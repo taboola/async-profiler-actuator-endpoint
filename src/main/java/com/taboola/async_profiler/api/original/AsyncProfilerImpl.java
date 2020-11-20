@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.taboola.async_profiler.api;
+package com.taboola.async_profiler.api.original;
 
 import java.io.IOException;
+
+import com.taboola.async_profiler.api.facade.profiler.AsyncProfilerInterface;
 
 /**
  * Java API for in-process profiling. Serves as a wrapper around
@@ -23,17 +25,17 @@ import java.io.IOException;
  * The first call to {@link #getInstance()} initiates loading of
  * libasyncProfiler.so.
  */
-public class AsyncProfiler implements AsyncProfilerMXBean {
-    private static AsyncProfiler instance;
+public class AsyncProfilerBla implements AsyncProfilerInterface {
+    private static AsyncProfilerBla instance;
 
-    private AsyncProfiler() {
+    private AsyncProfilerBla() {
     }
 
-    public static AsyncProfiler getInstance() {
+    public static AsyncProfilerBla getInstance() {
         return getInstance(null);
     }
 
-    public static synchronized AsyncProfiler getInstance(String libPath) {
+    public static synchronized AsyncProfilerBla getInstance(String libPath) {
         if (instance != null) {
             return instance;
         }
@@ -44,7 +46,7 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
             System.load(libPath);
         }
 
-        instance = new AsyncProfiler();
+        instance = new AsyncProfilerBla();
         return instance;
     }
 
@@ -68,7 +70,6 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
      * @param interval Sampling interval, e.g. nanoseconds for Events.CPU
      * @throws IllegalStateException If profiler is already running
      */
-    @Override
     public void resume(String event, long interval) throws IllegalStateException {
         start0(event, interval, false);
     }
@@ -88,7 +89,6 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
      *
      * @return Number of samples
      */
-    @Override
     public native long getSamples();
 
     /**
@@ -96,7 +96,6 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
      *
      * @return Version string
      */
-    @Override
     public String getVersion() {
         try {
             return execute0("version");
@@ -140,7 +139,6 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
      * @param maxTraces Maximum number of stack traces to dump. 0 means no limit
      * @return Textual representation of the profile
      */
-    @Override
     public String dumpTraces(int maxTraces) {
         try {
             return execute0("summary,traces=" + maxTraces);
@@ -155,7 +153,6 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
      * @param maxMethods Maximum number of methods to dump. 0 means no limit
      * @return Textual representation of the profile
      */
-    @Override
     public String dumpFlat(int maxMethods) {
         try {
             return execute0("summary,flat=" + maxMethods);

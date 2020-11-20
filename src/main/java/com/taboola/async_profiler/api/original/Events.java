@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.taboola.async_profiler.api;
+package com.taboola.async_profiler.api.core;
 
 /**
- * Which metrics to use when generating profile in collapsed stack traces format.
+ * Predefined event names to use in {@link AsyncProfiler#start(String, long)}
  */
-public enum Counter {
-    SAMPLES,
-    TOTAL
+public class Events {
+    public static final String CPU    = "cpu";
+    public static final String ALLOC  = "alloc";
+    public static final String LOCK   = "lock";
+    public static final String WALL   = "wall";
+    public static final String ITIMER = "itimer";
 }

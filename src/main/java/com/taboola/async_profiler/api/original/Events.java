@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.taboola.async_profiler.api.core;
+package com.taboola.async_profiler.api.original;
 
 /**
- * Predefined event names to use in {@link AsyncProfiler#start(String, long)}
+ * Predefined event names to use in {@link AsyncProfilerImpl#start(String, long)}
  */
 public class Events {
     public static final String CPU    = "cpu";

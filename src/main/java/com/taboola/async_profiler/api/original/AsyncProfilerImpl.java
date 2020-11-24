@@ -17,7 +17,7 @@ package com.taboola.async_profiler.api.original;
 
 import java.io.IOException;
 
-import com.taboola.async_profiler.api.facade.profiler.AsyncProfilerInterface;
+import com.taboola.async_profiler.api.facade.profiler.AsyncProfiler;
 
 /**
  * Java API for in-process profiling. Serves as a wrapper around
@@ -25,17 +25,17 @@ import com.taboola.async_profiler.api.facade.profiler.AsyncProfilerInterface;
  * The first call to {@link #getInstance()} initiates loading of
  * libasyncProfiler.so.
  */
-public class AsyncProfilerBla implements AsyncProfilerInterface {
-    private static AsyncProfilerBla instance;
+public class AsyncProfilerImpl implements AsyncProfiler {
+    private static AsyncProfilerImpl instance;
 
-    private AsyncProfilerBla() {
+    private AsyncProfilerImpl() {
     }
 
-    public static AsyncProfilerBla getInstance() {
+    public static AsyncProfilerImpl getInstance() {
         return getInstance(null);
     }
 
-    public static synchronized AsyncProfilerBla getInstance(String libPath) {
+    public static synchronized AsyncProfilerImpl getInstance(String libPath) {
         if (instance != null) {
             return instance;
         }
@@ -46,7 +46,7 @@ public class AsyncProfilerBla implements AsyncProfilerInterface {
             System.load(libPath);
         }
 
-        instance = new AsyncProfilerBla();
+        instance = new AsyncProfilerImpl();
         return instance;
     }
 
@@ -57,7 +57,6 @@ public class AsyncProfilerBla implements AsyncProfilerInterface {
      * @param interval Sampling interval, e.g. nanoseconds for Events.CPU
      * @throws IllegalStateException If profiler is already running
      */
-    @Override
     public void start(String event, long interval) throws IllegalStateException {
         start0(event, interval, true);
     }
@@ -79,7 +78,6 @@ public class AsyncProfilerBla implements AsyncProfilerInterface {
      *
      * @throws IllegalStateException If profiler is not running
      */
-    @Override
     public void stop() throws IllegalStateException {
         stop0();
     }
@@ -124,7 +122,6 @@ public class AsyncProfilerBla implements AsyncProfilerInterface {
      * @param counter Which counter to display in the output
      * @return Textual representation of the profile
      */
-    @Override
     public String dumpCollapsed(Counter counter) {
         try {
             return execute0("collapsed,counter=" + counter.name().toLowerCase());

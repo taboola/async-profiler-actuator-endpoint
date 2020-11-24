@@ -1,5 +1,7 @@
 package com.taboola.async_profiler.spring;
 
+import java.io.OutputStream;
+
 import org.springframework.boot.actuate.endpoint.Endpoint;
 import org.springframework.boot.actuate.endpoint.mvc.MvcEndpoint;
 import org.springframework.http.MediaType;
@@ -33,14 +35,24 @@ public class AsyncProfilerEndPoint implements MvcEndpoint {
     }
 
     @GetMapping(value = "/profile", produces = MediaType.TEXT_HTML_VALUE)
-    @ResponseBody
-    public String profile(ProfileRequest profilingRequest) {
-        return asyncProfilerFacade.profile(profilingRequest);
+    public void profile(ProfileRequest profileRequest, OutputStream responseOutputStream) {
+        asyncProfilerFacade.profile(profileRequest, responseOutputStream);
+    }
+
+    @GetMapping(value = "/stop", produces = MediaType.TEXT_HTML_VALUE)
+    public void stop(OutputStream responseOutputStream) {
+        asyncProfilerFacade.stop(responseOutputStream);
     }
 
     @GetMapping(value = "/events")
     @ResponseBody
     public String getSupportedEvents() {
         return asyncProfilerFacade.getSupportedEvents();
+    }
+
+    @GetMapping(value = "/version")
+    @ResponseBody
+    public String getVersion() {
+        return asyncProfilerFacade.getProfilerVersion();
     }
 }

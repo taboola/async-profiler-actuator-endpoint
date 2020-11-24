@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.taboola.async_profiler.api.core;
+package com.taboola.async_profiler.api.original;
 
 /**
  * Which metrics to use when generating profile in collapsed stack traces format.

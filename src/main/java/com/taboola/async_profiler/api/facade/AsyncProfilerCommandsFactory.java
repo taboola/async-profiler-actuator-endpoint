@@ -7,15 +7,23 @@ import com.taboola.async_profiler.api.original.Events;
 /**
  * Factory for AsyncProfiler string commands
  * */
-public class ProfileCommandFactory {
+public class AsyncProfilerCommandsFactory {
 
-    public String createProfileCommand(ProfileRequest profileRequest) {
-        validate(profileRequest);
+    public String createStartCommand(ProfileRequest profileRequest, String filePath) {
+        validate(profileRequest, filePath);
 
         StringBuilder stringBuilder = new StringBuilder("start");
 
         stringBuilder.append(",event=");
         stringBuilder.append(profileRequest.getEventType());
+
+        stringBuilder.append(",file=");
+        stringBuilder.append(filePath);
+
+        if (profileRequest.getFormat() != null && !profileRequest.getFormat().equals("")) {
+            stringBuilder.append(",");
+            stringBuilder.append(profileRequest.getFormat());
+        }
 
         Integer interval = getInterval(profileRequest);
         if (interval != null) {
@@ -33,8 +41,38 @@ public class ProfileCommandFactory {
         return stringBuilder.toString();
     }
 
+    public String createStopCommand(ProfileRequest profileRequest, String filePath, String title) {
+        StringBuilder stringBuilder = new StringBuilder("stop,file=");
+        stringBuilder.append(filePath);
+        if (profileRequest.getFormat() != null && !profileRequest.getFormat().equals("")) {
+            stringBuilder.append(",");
+            stringBuilder.append(profileRequest.getFormat());
+        }
+
+        if (profileRequest.getIncludedTraces() != null) {
+            stringBuilder.append(",include=");
+            stringBuilder.append(profileRequest.getIncludedTraces());
+        }
+
+        if (profileRequest.getExcludedTraces() != null) {
+            stringBuilder.append(",exclude=");
+            stringBuilder.append(profileRequest.getExcludedTraces());
+        }
+
+        if (title != null) {
+            stringBuilder.append(",title=");
+            stringBuilder.append(title);
+        }
+
+        return stringBuilder.toString();
+    }
+
     public String createGetSupportedEventsCommand() {
         return "list";
+    }
+
+    public String createGetVersionCommand() {
+        return "version";
     }
 
     private Integer getInterval(ProfileRequest profileRequest) {
@@ -50,7 +88,11 @@ public class ProfileCommandFactory {
         return interval;
     }
 
-    private void validate(ProfileRequest profileRequest) {
+    private void validate(ProfileRequest profileRequest, String filePath) {
+        if (filePath == null || filePath.equals("")) {
+            throw new IllegalArgumentException("File path must not be empty");
+        }
+
         if (profileRequest.getEventType() == null || profileRequest.getEventType().equals("")) {
             throw new IllegalArgumentException("Event type is required");
         }

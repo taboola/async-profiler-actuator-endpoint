@@ -11,6 +11,7 @@ public class ProfileRequest {
     private Integer samplingIntervalMs = 10;//10ms default, relevant only for non alloc events.
     private Integer samplingIntervalBytes = 10_000_000;//relevant only for alloc event.
     private String eventType = Events.CPU;
+    private String format = "svg";
     private String includedThreads;
     private String includedTraces;
     private String excludedTraces;
@@ -82,18 +83,31 @@ public class ProfileRequest {
         this.excludedTraces = excludedTraces;
     }
 
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
+
     public boolean hasIncludedThreads() {
         return includedThreads != null && !includedThreads.equals("");
+    }
+
+    public boolean isFlameGraphRequest() {
+        return "svg".equals(format) || "flamegraph".equals(format);
     }
 
     @Override
     public String toString() {
         return "ProfileRequest{" +
                 "durationSeconds=" + durationSeconds +
+                ", frameBufferSize=" + frameBufferSize +
                 ", samplingIntervalMs=" + samplingIntervalMs +
                 ", samplingIntervalBytes=" + samplingIntervalBytes +
-                ", frameBufferSize=" + frameBufferSize +
                 ", eventType='" + eventType + '\'' +
+                ", format='" + format + '\'' +
                 ", includedThreads='" + includedThreads + '\'' +
                 ", includedTraces='" + includedTraces + '\'' +
                 ", excludedTraces='" + excludedTraces + '\'' +
@@ -110,6 +124,7 @@ public class ProfileRequest {
                 Objects.equals(samplingIntervalMs, that.samplingIntervalMs) &&
                 Objects.equals(samplingIntervalBytes, that.samplingIntervalBytes) &&
                 Objects.equals(eventType, that.eventType) &&
+                Objects.equals(format, that.format) &&
                 Objects.equals(includedThreads, that.includedThreads) &&
                 Objects.equals(includedTraces, that.includedTraces) &&
                 Objects.equals(excludedTraces, that.excludedTraces);
@@ -117,6 +132,6 @@ public class ProfileRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(durationSeconds, samplingIntervalMs, samplingIntervalBytes, frameBufferSize, eventType, includedThreads, includedTraces, excludedTraces);
+        return Objects.hash(durationSeconds, frameBufferSize, samplingIntervalMs, samplingIntervalBytes, eventType, format, includedThreads, includedTraces, excludedTraces);
     }
 }

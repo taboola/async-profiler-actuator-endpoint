@@ -6,12 +6,45 @@
 
     <groupId>com.taboola</groupId>
     <artifactId>async-profiler-actuator-endpoint</artifactId>
-    <version>${projectVersion}</version>
+    <version>DEFAULT-VERSION-SNAPSHOT</version>
 
     <properties>
-        <projectVersion>0.0.1</projectVersion>
+        <com.taboola.spring.version>4.3.23.RELEASE</com.taboola.spring.version>
+        <com.taboola.spring.boot.version>1.5.20.RELEASE</com.taboola.spring.boot.version>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${com.taboola.spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${com.taboola.spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <version>${com.taboola.spring.boot.version}</version>
+        </dependency>
+
+        <!--Tests-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.10.19</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

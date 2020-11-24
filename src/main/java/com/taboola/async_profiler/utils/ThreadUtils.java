@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 public class ThreadUtils {
@@ -34,5 +35,9 @@ public class ThreadUtils {
         }
 
         return Collections.unmodifiableCollection(result);
+    }
+
+    public void sleep(long duration, TimeUnit timeUnit) throws InterruptedException {
+        Thread.sleep(timeUnit.toMillis(duration));
     }
 }

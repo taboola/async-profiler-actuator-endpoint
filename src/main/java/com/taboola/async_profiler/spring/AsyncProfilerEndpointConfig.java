@@ -55,7 +55,8 @@ public class AsyncProfilerEndpointConfig {
     }
 
     @Bean
-    public AsyncProfilerEndPoint asyncProfilerEndPoint(AsyncProfilerFacade asyncProfilerFacade) {
-        return new AsyncProfilerEndPoint(asyncProfilerFacade);
+    public AsyncProfilerEndPoint asyncProfilerEndPoint(AsyncProfilerFacade asyncProfilerFacade,
+                                                       @Value("${com.taboola.asyncprofiler.endpoint.sensitive:false}") boolean isSensitive) {
+        return new AsyncProfilerEndPoint(asyncProfilerFacade, isSensitive);
     }
 }

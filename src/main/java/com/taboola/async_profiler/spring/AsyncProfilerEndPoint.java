@@ -14,9 +14,11 @@ import com.taboola.async_profiler.api.facade.ProfileRequest;
 public class AsyncProfilerEndPoint implements MvcEndpoint {
 
     private final AsyncProfilerFacade asyncProfilerFacade;
+    private final boolean isSensitive;
 
-    public AsyncProfilerEndPoint(AsyncProfilerFacade asyncProfilerFacade) {
+    public AsyncProfilerEndPoint(AsyncProfilerFacade asyncProfilerFacade, boolean isSensitive) {
         this.asyncProfilerFacade = asyncProfilerFacade;
+        this.isSensitive = isSensitive;
     }
 
     @Override
@@ -26,7 +28,7 @@ public class AsyncProfilerEndPoint implements MvcEndpoint {
 
     @Override
     public boolean isSensitive() {
-        return false;
+        return isSensitive;
     }
 
     @Override

@@ -11,6 +11,7 @@
     <properties>
         <com.taboola.spring.version>4.3.23.RELEASE</com.taboola.spring.version>
         <com.taboola.spring.boot.version>1.5.20.RELEASE</com.taboola.spring.boot.version>
+        <com.taboola.lombok.version>1.18.10</com.taboola.lombok.version>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
     </properties>
@@ -30,6 +31,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-actuator</artifactId>
             <version>${com.taboola.spring.boot.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${com.taboola.lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!--Tests-->

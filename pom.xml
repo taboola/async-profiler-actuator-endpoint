@@ -6,7 +6,7 @@
 
     <groupId>com.taboola</groupId>
     <artifactId>async-profiler-actuator-endpoint</artifactId>
-    <version>DEFAULT-VERSION-SNAPSHOT</version>
+    <version>0.0.2</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Async Profiler Actuator Endpoint</description>

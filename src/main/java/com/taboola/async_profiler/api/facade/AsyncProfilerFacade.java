@@ -56,7 +56,7 @@ public class AsyncProfilerFacade {
                     referenceToCurrentProfileRequestContext.compareAndSet(profileContext, null);
                 }
             } else {
-                throw new IllegalStateException("Failed getting a profiling session, another one is already running: " + profileRequest);
+                throw new IllegalStateException("Failed getting a profiling session, another one is already running: " + referenceToCurrentProfileRequestContext.get());
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);

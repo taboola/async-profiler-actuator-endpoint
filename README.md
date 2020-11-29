@@ -1,6 +1,6 @@
 # async-profiler-actuator-endpoint
 This project contains a spring boot actuator endpoint implementation which serves as a wrapper over async-profiler (https://github.com/jvm-profiling-tools/async-profiler).
-It allows sending a http profile request directly to the profiled spring boot service, and get the flame graph in the response (or in any other supported format).
+It allows sending an http profile request directly to the profiled spring boot service, and get the flame graph in the response (or in any other supported format).
 
 It was tested with version 1.7.1 of async-profiler.
 

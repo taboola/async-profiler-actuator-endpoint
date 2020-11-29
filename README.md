@@ -1,4 +1,8 @@
 # async-profiler-actuator-endpoint
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.taboola/async-profiler-actuator-endpoint/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/com.taboola/async-profiler-actuator-endpoint)
+[![Build Status](https://travis-ci.org/taboola/async-profiler-actuator-endpoint.svg?branch=master)](https://travis-ci.org/taboola/async-profiler-actuator-endpoint)
+
 This project contains a spring boot actuator endpoint implementation which serves as a wrapper over async-profiler (https://github.com/jvm-profiling-tools/async-profiler).
 It allows sending an http profile request directly to the profiled spring boot service, and get the flame graph in the response (or in any other supported format).
 

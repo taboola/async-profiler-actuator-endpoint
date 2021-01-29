@@ -35,9 +35,13 @@ public class AsyncProfilerCommandsFactory {
         stringBuilder.append(profileRequest.getFrameBufferSize());
 
         if (profileRequest.hasIncludedThreads()) {
-            stringBuilder.append(",filter");//need to pass the filter flag when using the java threads filtering api
+            stringBuilder.append(",filter"); //need to pass the filter flag when using the java threads filtering api
         }
 
+        if (profileRequest.isSeparateThreads()) {
+            stringBuilder.append(",threads"); //profile different threads separately
+
+        }
         return stringBuilder.toString();
     }
 

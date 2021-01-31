@@ -9,7 +9,7 @@ public class ProfileRequest {
 
     private int durationSeconds = 60;//profiling duration
     private int frameBufferSize = 5_000_000;
-    private Integer samplingIntervalMs = 10;//10ms default, relevant only for non alloc events.
+    private Integer samplingIntervalMs = 1;//1ms default, relevant only for non alloc events.
     private Integer samplingIntervalBytes = 10_000_000;//relevant only for alloc event.
     private boolean separateThreads = false;
     private String eventType = Events.CPU;

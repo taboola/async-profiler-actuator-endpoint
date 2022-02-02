@@ -84,8 +84,8 @@ public class AsyncProfilerCommandsFactory {
         if (profileRequest.getEventType().equals(Events.ALLOC)) {
             interval = profileRequest.getSamplingIntervalBytes();
         } else {
-            if (profileRequest.getSamplingIntervalMs() != null) {
-                interval = Math.toIntExact(TimeUnit.MILLISECONDS.toNanos(profileRequest.getSamplingIntervalMs())); //interval should be in nanos
+            if (profileRequest.getSamplingInterval() != null) {
+                interval = Math.toIntExact(profileRequest.getSamplingIntervalTimeUnit().toNanos(profileRequest.getSamplingInterval())); //interval should be in nanos
             }
         }
 
@@ -105,7 +105,7 @@ public class AsyncProfilerCommandsFactory {
             throw new IllegalArgumentException("Profiling duration must be greater than 0");
         }
 
-        if (profileRequest.getSamplingIntervalMs() != null && profileRequest.getSamplingIntervalMs() <= 0) {
+        if (profileRequest.getSamplingInterval() != null && profileRequest.getSamplingInterval() <= 0) {
             throw new IllegalArgumentException("Sampling interval must be greater than 0");
         }
 

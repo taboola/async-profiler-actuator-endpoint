@@ -2,6 +2,8 @@ package com.taboola.async_profiler.api.facade;
 
 import static org.junit.Assert.*;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,11 +22,25 @@ public class AsyncProfilerCommandsFactoryTest {
         ProfileRequest profileRequest = new ProfileRequest();
         profileRequest.setEventType("cpu");
         profileRequest.setFormat("flamegraph");
-        profileRequest.setSamplingIntervalMs(1);
+        profileRequest.setSamplingInterval(1);
         profileRequest.setFrameBufferSize(10);
         String command = commandFactory.createStartCommand(profileRequest, file);
 
         assertEquals("start,event=cpu,file=f,flamegraph,interval=1000000,framebuf=10", command);
+    }
+
+    @Test
+    public void testCreateStartCommandWithTimeUnit() {
+        String file = "f";
+        ProfileRequest profileRequest = new ProfileRequest();
+        profileRequest.setEventType("cpu");
+        profileRequest.setFormat("flamegraph");
+        profileRequest.setSamplingInterval(1);
+        profileRequest.setSamplingIntervalTimeUnit(TimeUnit.NANOSECONDS);
+        profileRequest.setFrameBufferSize(10);
+        String command = commandFactory.createStartCommand(profileRequest, file);
+
+        assertEquals("start,event=cpu,file=f,flamegraph,interval=1,framebuf=10", command);
     }
 
     @Test
@@ -33,7 +49,7 @@ public class AsyncProfilerCommandsFactoryTest {
         ProfileRequest profileRequest = new ProfileRequest();
         profileRequest.setEventType("cpu");
         profileRequest.setFormat("flamegraph");
-        profileRequest.setSamplingIntervalMs(1);
+        profileRequest.setSamplingInterval(1);
         profileRequest.setFrameBufferSize(10);
         profileRequest.setIncludedThreads("a");
         String command = commandFactory.createStartCommand(profileRequest, file);
@@ -47,7 +63,7 @@ public class AsyncProfilerCommandsFactoryTest {
         ProfileRequest profileRequest = new ProfileRequest();
         profileRequest.setEventType("alloc");
         profileRequest.setFormat("flamegraph");
-        profileRequest.setSamplingIntervalMs(1);
+        profileRequest.setSamplingInterval(1);
         profileRequest.setSamplingIntervalBytes(2);
         profileRequest.setFrameBufferSize(10);
         String command = commandFactory.createStartCommand(profileRequest, file);
@@ -73,7 +89,7 @@ public class AsyncProfilerCommandsFactoryTest {
         assertThrows("Profiling duration must be greater than 0", IllegalArgumentException.class, () -> commandFactory.createStartCommand(finalProfileRequest2, "a"));
 
         profileRequest = new ProfileRequest();
-        profileRequest.setSamplingIntervalMs(-1);
+        profileRequest.setSamplingInterval(-1);
         ProfileRequest finalProfileRequest3 = profileRequest;
         assertThrows("Sampling interval must be greater than 0", IllegalArgumentException.class, () -> commandFactory.createStartCommand(finalProfileRequest3, "a"));
     }

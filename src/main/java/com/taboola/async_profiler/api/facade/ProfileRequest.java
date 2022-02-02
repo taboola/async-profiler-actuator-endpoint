@@ -4,12 +4,15 @@ import com.taboola.async_profiler.api.original.Events;
 
 import lombok.Data;
 
+import java.util.concurrent.TimeUnit;
+
 @Data
 public class ProfileRequest {
 
     private int durationSeconds = 60;//profiling duration
     private int frameBufferSize = 5_000_000;
-    private Integer samplingIntervalMs = 1;//1ms default, relevant only for non alloc events.
+    private Integer samplingInterval = 1;
+    private TimeUnit samplingIntervalTimeUnit = TimeUnit.MILLISECONDS;
     private Integer samplingIntervalBytes = 10_000_000;//relevant only for alloc event.
     private boolean separateThreads = false;
     private String eventType = Events.CPU;

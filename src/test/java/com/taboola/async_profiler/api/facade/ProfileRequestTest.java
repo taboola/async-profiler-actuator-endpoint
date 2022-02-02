@@ -12,7 +12,7 @@ public class ProfileRequestTest {
 
         assertEquals(60, profileRequest.getDurationSeconds());
         assertEquals(5_000_000, profileRequest.getFrameBufferSize());
-        assertEquals(1, profileRequest.getSamplingIntervalMs().intValue());
+        assertEquals(1, profileRequest.getSamplingInterval().intValue());
         assertEquals(10_000_000, profileRequest.getSamplingIntervalBytes().intValue());
         assertEquals("cpu", profileRequest.getEventType());
         assertEquals("svg", profileRequest.getFormat());

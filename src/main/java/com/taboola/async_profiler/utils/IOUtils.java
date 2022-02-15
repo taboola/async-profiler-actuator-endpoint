@@ -2,6 +2,7 @@ package com.taboola.async_profiler.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,10 +14,17 @@ public class IOUtils {
     private static final int EOF = -1;
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
-    public void copyFileContent(String inputFilePath, OutputStream outputStream) throws IOException {
-        try (InputStream inputStream = new FileInputStream(inputFilePath)){
-            copy(inputStream, outputStream);
-        }
+    public InputStream getDisposableFileInputStream(String path) throws FileNotFoundException {
+        return new FileInputStream(path) {
+            @Override
+            public void close() throws IOException {
+                try {
+                    super.close();
+                } finally {
+                    safeDeleteIfExists(path);
+                }
+            }
+        };
     }
 
     public void safeDeleteIfExists(String filePath) {

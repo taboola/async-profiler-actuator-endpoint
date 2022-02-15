@@ -1,6 +1,5 @@
 package com.taboola.async_profiler.spring;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -9,25 +8,24 @@ import org.springframework.context.annotation.Lazy;
 
 import com.taboola.async_profiler.api.facade.AsyncProfilerCommandsFactory;
 import com.taboola.async_profiler.api.facade.AsyncProfilerFacade;
-import com.taboola.async_profiler.api.facade.AsyncProfilerFacadeConfig;
 import com.taboola.async_profiler.api.facade.profiler.AsyncProfilerSupplier;
 import com.taboola.async_profiler.utils.IOUtils;
 import com.taboola.async_profiler.utils.ThreadUtils;
 
 @Configuration
 @Lazy
-@ConditionalOnProperty(name = "com.taboola.asyncprofiler.endpoint.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "com.taboola.asyncProfilerEndpoint.enabled", havingValue = "true", matchIfMissing = true)
 public class AsyncProfilerEndpointConfig {
 
     @Bean
-    public AsyncProfilerSupplier asyncProfilerSupplier(@Value("${com.taboola.asyncprofiler.lib.path:/opt/async-profiler/build/libasyncProfiler.so}") String libPath) {
-        return new AsyncProfilerSupplier(libPath);
+    public AsyncProfilerSupplier asyncProfilerSupplier(AsyncProfilerEndpointConfigurations asyncProfilerConfig) {
+        return new AsyncProfilerSupplier(asyncProfilerConfig.getLibPath());
     }
 
     @Bean
-    @ConfigurationProperties("com.taboola.asyncprofiler.facade")
-    public AsyncProfilerFacadeConfig asyncProfilerFacadeConfig() {
-        return new AsyncProfilerFacadeConfig();
+    @ConfigurationProperties("com.taboola.asyncProfiler")
+    public AsyncProfilerEndpointConfigurations asyncProfilerFacadeConfig() {
+        return new AsyncProfilerEndpointConfigurations();
     }
 
     @Bean
@@ -48,15 +46,19 @@ public class AsyncProfilerEndpointConfig {
     @Bean
     public AsyncProfilerFacade asyncProfilerFacade(AsyncProfilerSupplier asyncProfilerSupplier,
                                                    AsyncProfilerCommandsFactory profilerCommandsFactory,
-                                                   AsyncProfilerFacadeConfig asyncProfilerFacadeConfig,
+                                                   AsyncProfilerEndpointConfigurations asyncProfilerConfig,
                                                    ThreadUtils threadUtils,
                                                    IOUtils ioUtils) {
-        return new AsyncProfilerFacade(asyncProfilerSupplier.getProfiler(), asyncProfilerFacadeConfig, profilerCommandsFactory, threadUtils, ioUtils);
+        return new AsyncProfilerFacade(asyncProfilerSupplier.getProfiler(),
+                asyncProfilerConfig.getProfileTempFileName(),
+                profilerCommandsFactory,
+                threadUtils,
+                ioUtils);
     }
 
     @Bean
-    public AsyncProfilerEndPoint asyncProfilerEndPoint(AsyncProfilerFacade asyncProfilerFacade,
-                                                       @Value("${com.taboola.asyncprofiler.endpoint.sensitive:false}") boolean isSensitive) {
-        return new AsyncProfilerEndPoint(asyncProfilerFacade, isSensitive);
+    public AsyncProfilerEndpoint asyncProfilerEndpoint(AsyncProfilerFacade asyncProfilerFacade,
+                                                       AsyncProfilerEndpointConfigurations configurations) {
+        return new AsyncProfilerEndpoint(asyncProfilerFacade, configurations.isSensitiveEndpoint());
     }
 }

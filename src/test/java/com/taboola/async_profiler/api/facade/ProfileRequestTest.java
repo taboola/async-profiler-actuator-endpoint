@@ -1,8 +1,15 @@
 package com.taboola.async_profiler.api.facade;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+
+import com.taboola.async_profiler.api.original.Events;
+import com.taboola.async_profiler.api.original.Format;
 
 public class ProfileRequestTest {
 
@@ -11,43 +18,26 @@ public class ProfileRequestTest {
         ProfileRequest profileRequest = new ProfileRequest();
 
         assertEquals(60, profileRequest.getDurationSeconds());
-        assertEquals(5_000_000, profileRequest.getFrameBufferSize());
         assertEquals(1, profileRequest.getSamplingInterval().intValue());
-        assertEquals(10_000_000, profileRequest.getSamplingIntervalBytes().intValue());
-        assertEquals("cpu", profileRequest.getEventType());
-        assertEquals("svg", profileRequest.getFormat());
+        assertEquals(TimeUnit.MILLISECONDS, profileRequest.getSamplingIntervalTimeUnit());
+        assertEquals(10_000, profileRequest.getAllocIntervalBytes().intValue());
+        assertEquals(1, profileRequest.getLockThresholdNanos().intValue());
+        assertEquals(new HashSet<String>(){{add(Events.CPU);}}, profileRequest.getEvents());
+        assertEquals(Format.FLAMEGRAPH, profileRequest.getFormat());
         assertNull(profileRequest.getIncludedTraces());
         assertNull(profileRequest.getExcludedTraces());
         assertNull(profileRequest.getIncludedThreads());
     }
 
     @Test
-    public void testHasIncludedThreads() {
+    public void testGetFormat() {
         ProfileRequest profileRequest = new ProfileRequest();
+        assertEquals(Format.FLAMEGRAPH, profileRequest.getFormat());
 
-        profileRequest.setIncludedThreads(null);
-        assertFalse(profileRequest.hasIncludedThreads());
+        profileRequest.setFormat(Format.COLLAPSED);
+        assertEquals(Format.COLLAPSED, profileRequest.getFormat());
 
-        profileRequest.setIncludedThreads("");
-        assertFalse(profileRequest.hasIncludedThreads());
-
-        profileRequest.setIncludedThreads("a");
-        assertTrue(profileRequest.hasIncludedThreads());
-    }
-
-    @Test
-    public void testIsFlameGraphRequest() {
-        ProfileRequest profileRequest = new ProfileRequest();
-
-        assertTrue(profileRequest.isFlameGraphRequest());
-
-        profileRequest.setFormat("svg");
-        assertTrue(profileRequest.isFlameGraphRequest());
-
-        profileRequest.setFormat("flamegraph");
-        assertTrue(profileRequest.isFlameGraphRequest());
-
-        profileRequest.setFormat("a");
-        assertFalse(profileRequest.isFlameGraphRequest());
+        profileRequest.setEvents(new HashSet<String>(){{add(Events.CPU);add(Events.ALLOC);}});
+        assertEquals(Format.JFR, profileRequest.getFormat());
     }
 }

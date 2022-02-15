@@ -1,31 +1,34 @@
 package com.taboola.async_profiler.api.facade;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import com.taboola.async_profiler.api.original.Events;
+import com.taboola.async_profiler.api.original.Format;
 
 import lombok.Data;
 
-import java.util.concurrent.TimeUnit;
-
 @Data
 public class ProfileRequest {
+    Set<String> events = new HashSet<String>(){{add(Events.CPU);}};
+    Format format = Format.FLAMEGRAPH;
+    int durationSeconds = 60;//profiling duration
+    Integer samplingInterval = 1;
+    TimeUnit samplingIntervalTimeUnit = TimeUnit.MILLISECONDS;
+    Integer allocIntervalBytes = 10_000;//relevant only for alloc event.
+    Integer lockThresholdNanos = 1;//relevant only for lock event.
+    boolean separateThreads = false;
+    String includedThreads;
+    String includedTraces;
+    String excludedTraces;
 
-    private int durationSeconds = 60;//profiling duration
-    private int frameBufferSize = 5_000_000;
-    private Integer samplingInterval = 1;
-    private TimeUnit samplingIntervalTimeUnit = TimeUnit.MILLISECONDS;
-    private Integer samplingIntervalBytes = 10_000_000;//relevant only for alloc event.
-    private boolean separateThreads = false;
-    private String eventType = Events.CPU;
-    private String format = "svg";
-    private String includedThreads;
-    private String includedTraces;
-    private String excludedTraces;
+    public Format getFormat() {
+        if (events != null && events.size() > 1) {
+            //when profiling multiple events together only jfr is supported, convert automatically
+            return Format.JFR;
+        }
 
-    public boolean hasIncludedThreads() {
-        return includedThreads != null && !includedThreads.equals("");
-    }
-
-    public boolean isFlameGraphRequest() {
-        return "svg".equals(format) || "flamegraph".equals(format);
+        return format;
     }
 }

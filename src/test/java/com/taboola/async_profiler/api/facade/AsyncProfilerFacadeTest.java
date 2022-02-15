@@ -1,6 +1,7 @@
 package com.taboola.async_profiler.api.facade;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -13,7 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.taboola.async_profiler.api.facade.profiler.AsyncProfiler;
+import com.taboola.async_profiler.api.original.Format;
 import com.taboola.async_profiler.utils.IOUtils;
 import com.taboola.async_profiler.utils.ThreadUtils;
 
@@ -35,66 +37,62 @@ public class AsyncProfilerFacadeTest {
     @Mock
     private AsyncProfilerCommandsFactory commandsFactory;
     @Mock
-    private AsyncProfilerFacadeConfig facadeConfig;
-    @Mock
     private ThreadUtils threadUtils;
     @Mock
     private IOUtils ioUtils;
 
+    private String tmpFile;
     private AsyncProfilerFacade asyncProfilerFacade;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        this.asyncProfilerFacade = new AsyncProfilerFacade(asyncProfiler, facadeConfig, commandsFactory, threadUtils, ioUtils);
+        tmpFile = "tmpFile";
+        this.asyncProfilerFacade = new AsyncProfilerFacade(asyncProfiler, tmpFile, commandsFactory, threadUtils, ioUtils);
     }
 
     @Test
     public void testProfile() throws IOException, InterruptedException {
         ProfileRequest profileRequest = new ProfileRequest();
-        OutputStream outputStream = mock(OutputStream.class);
+        InputStream inputStreamMock = mock(InputStream.class);
 
-        when(facadeConfig.getSuccessfulStartCommandResponse()).thenReturn("OKstart");
-        when(facadeConfig.getSuccessfulStopCommandResponse()).thenReturn("OKstop");
-        when(facadeConfig.getProfileTempFileName()).thenReturn("tmpFile");
         when(ioUtils.createTempFile(eq("tmpFile"), eq(".tmp"))).thenReturn("tmpFilePath");
         when(commandsFactory.createStartCommand(eq(profileRequest), eq("tmpFilePath"))).thenReturn("start");
-        when(asyncProfiler.execute(eq("start"))).thenReturn("OKstart");
-        when(commandsFactory.createStopCommand(eq(profileRequest), eq("tmpFilePath"), startsWith("CPU Flame Graph"))).thenReturn("stop");
-        when(asyncProfiler.execute(eq("stop"))).thenReturn("OKstop");
+        when(commandsFactory.createStopCommand(eq(profileRequest), eq("tmpFilePath"), startsWith("[cpu] Flame Graph"))).thenReturn("stop");
+        when(ioUtils.getDisposableFileInputStream(eq("tmpFilePath"))).thenReturn(inputStreamMock);
 
-        asyncProfilerFacade.profile(profileRequest, outputStream);
+        ProfileResult profileResult = asyncProfilerFacade.profile(profileRequest);
+
+        assertSame(inputStreamMock, profileResult.getResultInputStream());
+        assertEquals(Format.FLAMEGRAPH, profileResult.getFormat());
 
         verify(ioUtils, times(1)).createTempFile(eq("tmpFile"), eq(".tmp"));
         verify(asyncProfiler, times(1)).execute(eq("start"));
         verify(threadUtils, times(1)).sleep(eq((long)profileRequest.getDurationSeconds()), eq(TimeUnit.SECONDS));
         verify(asyncProfiler, times(1)).execute(eq("stop"));
-        verify(ioUtils, times(1)).copyFileContent(eq("tmpFilePath"), same(outputStream));
-        verify(ioUtils, times(1)).safeDeleteIfExists(eq("tmpFilePath"));
     }
 
     @Test
     public void testProfile_whenContainIncludedThreads_shouldFindAndAddThemToTheProfiler() throws IOException, InterruptedException {
         ProfileRequest profileRequest = new ProfileRequest();
         profileRequest.setIncludedThreads("qtp");
-        OutputStream outputStream = mock(OutputStream.class);
         List<Thread> profiledThreads = new ArrayList<>();
         profiledThreads.add(mock(Thread.class));
         profiledThreads.get(0).setName("qtp-123");
         profiledThreads.add(mock(Thread.class));
         profiledThreads.get(1).setName("qtp-124");
+        InputStream inputStreamMock = mock(InputStream.class);
 
-        when(facadeConfig.getSuccessfulStartCommandResponse()).thenReturn("OKstart");
-        when(facadeConfig.getSuccessfulStopCommandResponse()).thenReturn("OKstop");
-        when(facadeConfig.getProfileTempFileName()).thenReturn("tmpFile");
         when(ioUtils.createTempFile(eq("tmpFile"), eq(".tmp"))).thenReturn("tmpFilePath");
         when(commandsFactory.createStartCommand(eq(profileRequest), eq("tmpFilePath"))).thenReturn("start");
-        when(asyncProfiler.execute(eq("start"))).thenReturn("OKstart");
         when(threadUtils.getAllThreads(any())).thenReturn(profiledThreads);
-        when(commandsFactory.createStopCommand(eq(profileRequest), eq("tmpFilePath"), startsWith("CPU Flame Graph"))).thenReturn("stop");
-        when(asyncProfiler.execute(eq("stop"))).thenReturn("OKstop");
+        when(commandsFactory.createStopCommand(eq(profileRequest), eq("tmpFilePath"), startsWith("[cpu] Flame Graph"))).thenReturn("stop");
+        when(ioUtils.getDisposableFileInputStream(eq("tmpFilePath"))).thenReturn(inputStreamMock);
 
-        asyncProfilerFacade.profile(profileRequest, outputStream);
+        ProfileResult profileResult = asyncProfilerFacade.profile(profileRequest);
+
+        assertSame(inputStreamMock, profileResult.getResultInputStream());
+        assertEquals(Format.FLAMEGRAPH, profileResult.getFormat());
 
         verify(ioUtils, times(1)).createTempFile(eq("tmpFile"), eq(".tmp"));
         verify(asyncProfiler, times(1)).execute(eq("start"));
@@ -102,60 +100,41 @@ public class AsyncProfilerFacadeTest {
         verify(asyncProfiler, times(1)).addThread(same(profiledThreads.get(1)));
         verify(threadUtils, times(1)).sleep(eq((long)profileRequest.getDurationSeconds()), eq(TimeUnit.SECONDS));
         verify(asyncProfiler, times(1)).execute(eq("stop"));
-        verify(ioUtils, times(1)).copyFileContent(eq("tmpFilePath"), same(outputStream));
-        verify(ioUtils, times(1)).safeDeleteIfExists(eq("tmpFilePath"));
     }
 
     @Test
     public void testProfile_whenDidNotStartSuccessfully_shouldThrow() throws IOException {
         ProfileRequest profileRequest = new ProfileRequest();
-        OutputStream outputStream = mock(OutputStream.class);
 
-        when(facadeConfig.getSuccessfulStartCommandResponse()).thenReturn("OKstart");
-        when(facadeConfig.getSuccessfulStopCommandResponse()).thenReturn("OKstop");
-        when(facadeConfig.getProfileTempFileName()).thenReturn("tmpFile");
         when(ioUtils.createTempFile(eq("tmpFile"), eq(".tmp"))).thenReturn("tmpFilePath");
         when(commandsFactory.createStartCommand(eq(profileRequest), eq("tmpFilePath"))).thenReturn("start");
-        when(asyncProfiler.execute(eq("start"))).thenReturn("failure");
+        when(asyncProfiler.execute(eq("start"))).thenThrow(new IllegalStateException("failure"));
         when(commandsFactory.createStopCommand(eq(profileRequest), eq("tmpFilePath"), startsWith("CPU Flame Graph"))).thenReturn("stop");
-        when(asyncProfiler.execute(eq("stop"))).thenReturn("OKstop");
 
-        assertThrows("Failed executing start command: failure", RuntimeException.class, () -> asyncProfilerFacade.profile(profileRequest, outputStream));
+        assertThrows(RuntimeException.class, () -> asyncProfilerFacade.profile(profileRequest));
         verify(ioUtils, times(1)).safeDeleteIfExists(eq("tmpFilePath"));
     }
 
     @Test
     public void testProfile_whenDidNotStopSuccessfully_shouldThrow() throws IOException {
         ProfileRequest profileRequest = new ProfileRequest();
-        OutputStream outputStream = mock(OutputStream.class);
 
-        when(facadeConfig.getSuccessfulStartCommandResponse()).thenReturn("OKstart");
-        when(facadeConfig.getSuccessfulStopCommandResponse()).thenReturn("OKstop");
-        when(facadeConfig.getProfileTempFileName()).thenReturn("tmpFile");
         when(ioUtils.createTempFile(eq("tmpFile"), eq(".tmp"))).thenReturn("tmpFilePath");
-        when(commandsFactory.createStartCommand(eq(profileRequest), eq("tmpFilePath"))).thenReturn("start");
-        when(asyncProfiler.execute(eq("start"))).thenReturn("OKstart");
-        when(commandsFactory.createStopCommand(eq(profileRequest), eq("tmpFilePath"), startsWith("CPU Flame Graph"))).thenReturn("stop");
-        when(asyncProfiler.execute(eq("stop"))).thenReturn("failed to stop");
+        when(commandsFactory.createStopCommand(eq(profileRequest), eq("tmpFilePath"), startsWith("[cpu] Flame Graph"))).thenReturn("stop");
+        when(asyncProfiler.execute(eq("stop"))).thenThrow(new IllegalStateException("failure"));
 
-        assertThrows("Failed executing start command: failed to stop", RuntimeException.class, () -> asyncProfilerFacade.profile(profileRequest, outputStream));
+        assertThrows(RuntimeException.class, () -> asyncProfilerFacade.profile(profileRequest));
         verify(ioUtils, times(1)).safeDeleteIfExists(eq("tmpFilePath"));
     }
 
     @Test
     public void testProfile_whenProfilerThrows_shouldThrow() throws IOException {
         ProfileRequest profileRequest = new ProfileRequest();
-        OutputStream outputStream = mock(OutputStream.class);
 
-        when(facadeConfig.getSuccessfulStartCommandResponse()).thenReturn("OKstart");
-        when(facadeConfig.getSuccessfulStopCommandResponse()).thenReturn("OKstop");
-        when(facadeConfig.getProfileTempFileName()).thenReturn("tmpFile");
         when(ioUtils.createTempFile(eq("tmpFile"), eq(".tmp"))).thenReturn("tmpFilePath");
-        when(commandsFactory.createStartCommand(eq(profileRequest), eq("tmpFilePath"))).thenReturn("start");
         when(asyncProfiler.execute(any())).thenThrow(new RuntimeException("failure in profiler"));
-        when(commandsFactory.createStopCommand(eq(profileRequest), eq("tmpFilePath"), startsWith("CPU Flame Graph"))).thenReturn("stop");
 
-        assertThrows("failure in profiler", RuntimeException.class, () -> asyncProfilerFacade.profile(profileRequest, outputStream));
+        assertThrows(RuntimeException.class, () -> asyncProfilerFacade.profile(profileRequest));
         verify(ioUtils, times(1)).safeDeleteIfExists(eq("tmpFilePath"));
     }
 
@@ -163,21 +142,19 @@ public class AsyncProfilerFacadeTest {
     public void testStop() throws IOException {
         AsyncProfilerFacade asyncProfilerFacadeSpy = spy(asyncProfilerFacade);
         Thread originalRequestThread = mock(Thread.class);
-        OutputStream outputStream = mock(OutputStream.class);
         ProfileContext originalProfileContext = new ProfileContext(new ProfileRequest(), LocalDateTime.now(), "tmpFilePath", originalRequestThread);
+        InputStream inputStreamMock = mock(InputStream.class);
 
         when(asyncProfilerFacadeSpy.getCurrentProfileRequestContext()).thenReturn(originalProfileContext);
-        when(facadeConfig.getSuccessfulStartCommandResponse()).thenReturn("OKstart");
-        when(facadeConfig.getSuccessfulStopCommandResponse()).thenReturn("OKstop");
-        when(facadeConfig.getProfileTempFileName()).thenReturn("tmpFile");
-        when(commandsFactory.createStopCommand(eq(originalProfileContext.getProfileRequest()), eq(originalProfileContext.getTmpFilePath()), startsWith("CPU Flame Graph"))).thenReturn("stop");
-        when(asyncProfiler.execute(eq("stop"))).thenReturn("OKstop");
+        when(commandsFactory.createStopCommand(eq(originalProfileContext.getProfileRequest()), eq(originalProfileContext.getTmpFilePath()), startsWith("[cpu] Flame Graph"))).thenReturn("stop");
+        when(ioUtils.getDisposableFileInputStream(eq("tmpFilePath"))).thenReturn(inputStreamMock);
 
-        asyncProfilerFacadeSpy.stop(outputStream);
+        ProfileResult profileResult = asyncProfilerFacadeSpy.stop();
+
+        assertSame(inputStreamMock, profileResult.getResultInputStream());
+        assertEquals(Format.FLAMEGRAPH, profileResult.getFormat());
 
         verify(asyncProfiler, times(1)).execute(eq("stop"));
-        verify(ioUtils, times(1)).copyFileContent(eq("tmpFilePath"), same(outputStream));
-        verify(ioUtils, times(1)).safeDeleteIfExists(eq("tmpFilePath"));
         verify(originalRequestThread, times(1)).interrupt();
     }
 
@@ -185,17 +162,13 @@ public class AsyncProfilerFacadeTest {
     public void testStop_whenNoActiveRequest_shouldThrow() throws IOException {
         AsyncProfilerFacade asyncProfilerFacadeSpy = spy(asyncProfilerFacade);
         Thread originalRequestThread = mock(Thread.class);
-        OutputStream outputStream = mock(OutputStream.class);
         ProfileContext originalProfileContext = new ProfileContext(new ProfileRequest(), LocalDateTime.now(), "tmpFilePath", originalRequestThread);
 
         when(asyncProfilerFacadeSpy.getCurrentProfileRequestContext()).thenReturn(null);
-        when(facadeConfig.getSuccessfulStartCommandResponse()).thenReturn("OKstart");
-        when(facadeConfig.getSuccessfulStopCommandResponse()).thenReturn("OKstop");
-        when(facadeConfig.getProfileTempFileName()).thenReturn("tmpFile");
         when(commandsFactory.createStopCommand(eq(originalProfileContext.getProfileRequest()), eq(originalProfileContext.getTmpFilePath()), startsWith("CPU Flame Graph"))).thenReturn("stop");
         when(asyncProfiler.execute(eq("stop"))).thenReturn("OKstop");
 
-        assertThrows("There is no active profiling session to stop", IllegalStateException.class, () -> asyncProfilerFacadeSpy.stop(outputStream));
+        assertThrows(IllegalStateException.class, asyncProfilerFacadeSpy::stop);
     }
 
     @Test

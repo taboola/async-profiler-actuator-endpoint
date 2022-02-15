@@ -1,6 +1,6 @@
 package com.taboola.async_profiler.api.facade;
 
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.taboola.async_profiler.api.original.Events;
 
@@ -15,26 +15,27 @@ public class AsyncProfilerCommandsFactory {
         StringBuilder stringBuilder = new StringBuilder("start");
 
         stringBuilder.append(",event=");
-        stringBuilder.append(profileRequest.getEventType());
+        stringBuilder.append(String.join(",", profileRequest.getEvents()));
 
-        stringBuilder.append(",file=");
-        stringBuilder.append(filePath);
+        appendFileAndFormat(profileRequest, filePath, stringBuilder);
 
-        if (profileRequest.getFormat() != null && !profileRequest.getFormat().equals("")) {
-            stringBuilder.append(",");
-            stringBuilder.append(profileRequest.getFormat());
-        }
-
-        Integer interval = getInterval(profileRequest);
-        if (interval != null) {
+        if (profileRequest.getSamplingInterval() != null && profileRequest.getSamplingIntervalTimeUnit() != null) {
+            int interval = Math.toIntExact(profileRequest.getSamplingIntervalTimeUnit().toNanos(profileRequest.getSamplingInterval())); //interval should be in nanos
             stringBuilder.append(",interval=");
             stringBuilder.append(interval);
         }
 
-        stringBuilder.append(",framebuf=");
-        stringBuilder.append(profileRequest.getFrameBufferSize());
+        if (profileRequest.getEvents().contains(Events.ALLOC) && profileRequest.getAllocIntervalBytes() != null) {
+            stringBuilder.append(",alloc=");
+            stringBuilder.append(profileRequest.getAllocIntervalBytes());
+        }
 
-        if (profileRequest.hasIncludedThreads()) {
+        if (profileRequest.getEvents().contains(Events.LOCK) && profileRequest.getLockThresholdNanos() != null) {
+            stringBuilder.append(",lock=");
+            stringBuilder.append(profileRequest.getLockThresholdNanos());
+        }
+
+        if (profileRequest.getIncludedThreads() != null) {
             stringBuilder.append(",filter"); //need to pass the filter flag when using the java threads filtering api
         }
 
@@ -42,16 +43,13 @@ public class AsyncProfilerCommandsFactory {
             stringBuilder.append(",threads"); //profile different threads separately
 
         }
+
         return stringBuilder.toString();
     }
 
     public String createStopCommand(ProfileRequest profileRequest, String filePath, String title) {
-        StringBuilder stringBuilder = new StringBuilder("stop,file=");
-        stringBuilder.append(filePath);
-        if (profileRequest.getFormat() != null && !profileRequest.getFormat().equals("")) {
-            stringBuilder.append(",");
-            stringBuilder.append(profileRequest.getFormat());
-        }
+        StringBuilder stringBuilder = new StringBuilder("stop");
+        appendFileAndFormat(profileRequest, filePath, stringBuilder);
 
         if (profileRequest.getIncludedTraces() != null) {
             stringBuilder.append(",include=");
@@ -79,17 +77,12 @@ public class AsyncProfilerCommandsFactory {
         return "version";
     }
 
-    private Integer getInterval(ProfileRequest profileRequest) {
-        Integer interval = null;
-        if (profileRequest.getEventType().equals(Events.ALLOC)) {
-            interval = profileRequest.getSamplingIntervalBytes();
-        } else {
-            if (profileRequest.getSamplingInterval() != null) {
-                interval = Math.toIntExact(profileRequest.getSamplingIntervalTimeUnit().toNanos(profileRequest.getSamplingInterval())); //interval should be in nanos
-            }
-        }
+    private void appendFileAndFormat(ProfileRequest profileRequest, String filePath, StringBuilder stringBuilder) {
+        stringBuilder.append(",file=");
+        stringBuilder.append(filePath);
 
-        return interval;
+        stringBuilder.append(",");
+        stringBuilder.append(profileRequest.getFormat().name().toLowerCase());
     }
 
     private void validate(ProfileRequest profileRequest, String filePath) {
@@ -97,8 +90,8 @@ public class AsyncProfilerCommandsFactory {
             throw new IllegalArgumentException("File path must not be empty");
         }
 
-        if (profileRequest.getEventType() == null || profileRequest.getEventType().equals("")) {
-            throw new IllegalArgumentException("Event type is required");
+        if (profileRequest.getEvents() == null || profileRequest.getEvents().isEmpty()) {
+            throw new IllegalArgumentException("Events is required");
         }
 
         if (profileRequest.getDurationSeconds() <= 0) {
@@ -109,12 +102,12 @@ public class AsyncProfilerCommandsFactory {
             throw new IllegalArgumentException("Sampling interval must be greater than 0");
         }
 
-        if (profileRequest.getSamplingIntervalBytes() != null && profileRequest.getSamplingIntervalBytes() <= 0) {
-            throw new IllegalArgumentException("Sampling interval must be greater than 0");
+        if (profileRequest.getAllocIntervalBytes() != null && profileRequest.getAllocIntervalBytes() <= 0) {
+            throw new IllegalArgumentException("Alloc interval must be greater than 0");
         }
 
-        if (profileRequest.getFrameBufferSize() <= 0) {
-            throw new IllegalArgumentException("Frame buffer size must be greater than 0");
+        if (profileRequest.getLockThresholdNanos() != null && profileRequest.getLockThresholdNanos() <= 0) {
+            throw new IllegalArgumentException("Lock threshold must be greater than 0");
         }
     }
 }

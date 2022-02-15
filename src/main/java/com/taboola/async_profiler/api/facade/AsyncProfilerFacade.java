@@ -1,7 +1,7 @@
 package com.taboola.async_profiler.api.facade;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.taboola.async_profiler.api.facade.profiler.AsyncProfiler;
+import com.taboola.async_profiler.api.original.Format;
 import com.taboola.async_profiler.utils.IOUtils;
 import com.taboola.async_profiler.utils.ThreadUtils;
 
@@ -21,18 +22,18 @@ public class AsyncProfilerFacade {
 
     private final AsyncProfiler asyncProfiler;
     private final AsyncProfilerCommandsFactory asyncProfilerCommandsFactory;
-    private final AsyncProfilerFacadeConfig facadeConfig;
+    private final String tempFileName;
     private final ThreadUtils threadUtils;
     private final IOUtils ioUtils;
     private final AtomicReference<ProfileContext> referenceToCurrentProfileRequestContext;
 
     public AsyncProfilerFacade(AsyncProfiler asyncProfiler,
-                               AsyncProfilerFacadeConfig asyncProfilerFacadeConfig,
+                               String tempFileName,
                                AsyncProfilerCommandsFactory asyncProfilerCommandsFactory,
                                ThreadUtils threadUtils,
                                IOUtils ioUtils) {
         this.asyncProfiler = asyncProfiler;
-        this.facadeConfig = asyncProfilerFacadeConfig;
+        this.tempFileName = tempFileName;
         this.asyncProfilerCommandsFactory = asyncProfilerCommandsFactory;
         this.threadUtils = threadUtils;
         this.ioUtils = ioUtils;
@@ -40,56 +41,57 @@ public class AsyncProfilerFacade {
     }
 
     /**
-     * Execute a profile request and dump the result into the given OutputStream.
+     * Execute a profile request.
+     * @param profileRequest contains profiling configuration for the current session
+     * @return a {@link ProfileResult}
      * */
-    public void profile(ProfileRequest profileRequest, OutputStream outputStream) {
+    public ProfileResult profile(ProfileRequest profileRequest) {
         ProfileContext profileContext = null;
         try {
-            profileContext = new ProfileContext(profileRequest, LocalDateTime.now(), ioUtils.createTempFile(facadeConfig.getProfileTempFileName(), ".tmp"), Thread.currentThread());
+            profileContext = new ProfileContext(profileRequest, LocalDateTime.now(), ioUtils.createTempFile(tempFileName, ".tmp"), Thread.currentThread());
             //We store the current context (in an atomic reference) in order to:
             //1. Allow a single profile request at a time
             //2. Allow stopping the current session from a separate request
             if (referenceToCurrentProfileRequestContext.compareAndSet(null, profileContext)) {
                 try {
-                    profileInternal(profileContext, outputStream);
+                    return profileInternal(profileContext);
                 } finally {
                     referenceToCurrentProfileRequestContext.compareAndSet(profileContext, null);
                 }
             } else {
                 throw new IllegalStateException("Failed getting a profiling session, another one is already running: " + referenceToCurrentProfileRequestContext.get());
             }
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
+        } catch (Exception e) {
             if (profileContext != null) {
                 ioUtils.safeDeleteIfExists(profileContext.getTmpFilePath());
             }
+
+            throw new RuntimeException("Unexpected failure occurred: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Try stopping the currently running profile request, if any, and dump the result into the given OutputStream.
+     * Try stopping the currently running profile request, if any.
+     * @return the {@link ProfileResult} of the stopped session
      * */
-    public void stop(OutputStream outputStream) {
+    public ProfileResult stop() {
         ProfileContext originalProfileContext = getCurrentProfileRequestContext();
-        try {
-            if (originalProfileContext != null) {
-                try {
-                    stopInternal(originalProfileContext, outputStream);
-                } finally {
-                    ioUtils.safeDeleteIfExists(originalProfileContext.getTmpFilePath());
-                    originalProfileContext.getRequestThread().interrupt();//if the original thread is sleeping, interrupt it
-                }
-            } else {
-                throw new IllegalStateException("There is no active profiling session to stop");
+        if (originalProfileContext != null) {
+            try {
+                return stopInternal(originalProfileContext);
+            } catch (Exception ex) {
+                ioUtils.safeDeleteIfExists(originalProfileContext.getTmpFilePath());
+                throw new IllegalStateException("Failed stopping the current session: " + ex.getMessage(), ex);
+            } finally {
+                originalProfileContext.getRequestThread().interrupt();//if the original thread is sleeping, interrupt it
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } else {
+            throw new IllegalStateException("There is no active profiling session to stop");
         }
     }
 
     /**
-     * Return the supported event types for the current run-time env
+     * @return the supported event types for the current run-time env
      * */
     public String getSupportedEvents() {
         try {
@@ -111,39 +113,38 @@ public class AsyncProfilerFacade {
         return referenceToCurrentProfileRequestContext.get();
     }
 
-    private void profileInternal(ProfileContext profileContext, OutputStream outputStream) throws IOException, InterruptedException {
+    private ProfileResult profileInternal(ProfileContext profileContext) throws IOException, InterruptedException {
         ProfileRequest profileRequest = profileContext.getProfileRequest();
         String tmpFilePath = profileContext.getTmpFilePath();
-        String startCommandResponse = asyncProfiler.execute(asyncProfilerCommandsFactory.createStartCommand(profileRequest, tmpFilePath));
-        if (startedSuccessfully(startCommandResponse)) {
-            profileSpecificThreadsIfNeeded(profileRequest);
-            threadUtils.sleep(profileRequest.getDurationSeconds(), TimeUnit.SECONDS);
-            stopInternal(profileContext, outputStream);
-        } else {
-            throw new IllegalStateException("Failed starting the profiler: " + startCommandResponse);
-        }
+        asyncProfiler.execute(asyncProfilerCommandsFactory.createStartCommand(profileRequest, tmpFilePath));
+        profileSpecificThreadsIfNeeded(profileRequest);
+
+        threadUtils.sleep(profileRequest.getDurationSeconds(), TimeUnit.SECONDS);
+
+        return stopInternal(profileContext);
     }
 
-    private void stopInternal(ProfileContext profileContext, OutputStream outputStream) throws IOException {
-        String stopCommandResponse = asyncProfiler.execute(asyncProfilerCommandsFactory.createStopCommand(profileContext.getProfileRequest(), profileContext.getTmpFilePath(), buildTitleIfNeeded(profileContext.getProfileRequest(), profileContext.getStartTime())));
+    private ProfileResult stopInternal(ProfileContext profileContext) throws IOException {
+        String stopCommand = asyncProfilerCommandsFactory.createStopCommand(profileContext.getProfileRequest(),
+                profileContext.getTmpFilePath(),
+                buildTitleIfNeeded(profileContext.getProfileRequest(), profileContext.getStartTime()));
 
-        if (stoppedSuccessfully(stopCommandResponse)) {
-            ioUtils.copyFileContent(profileContext.getTmpFilePath(), outputStream);
-        } else {
-            throw new IllegalStateException("Failed stopping the profiler: " + stopCommandResponse);
-        }
+        asyncProfiler.execute(stopCommand);
+
+        InputStream resultInputStream = ioUtils.getDisposableFileInputStream(profileContext.getTmpFilePath());
+        return new ProfileResult(resultInputStream, profileContext.getProfileRequest().getFormat());
     }
 
     private String buildTitleIfNeeded(ProfileRequest profileRequest, LocalDateTime startTime) {
         String title = null;
-        if (profileRequest.isFlameGraphRequest()) {
-            title = String.format("%s Flame Graph (%s - %s)", profileRequest.getEventType().toUpperCase(), startTime.format(formatter), LocalDateTime.now().format(formatter));
+        if (Format.FLAMEGRAPH.equals(profileRequest.getFormat())) {
+            title = String.format("%s Flame Graph (%s - %s)", profileRequest.getEvents(), startTime.format(formatter), LocalDateTime.now().format(formatter));
         }
         return title;
     }
 
     private void profileSpecificThreadsIfNeeded(ProfileRequest profileRequest) {
-        if (profileRequest.hasIncludedThreads()) {
+        if (profileRequest.getIncludedThreads() != null) {
             String includedThreadsName = profileRequest.getIncludedThreads();
             Collection<Thread> monitoredThreads = threadUtils.getAllThreads(thread -> shouldIncludeThread(thread, includedThreadsName));
 
@@ -151,14 +152,6 @@ public class AsyncProfilerFacade {
                 asyncProfiler.addThread(thread);
             }
         }
-    }
-
-    private boolean startedSuccessfully(String startCommandResponse) {
-        return startCommandResponse.startsWith(facadeConfig.getSuccessfulStartCommandResponse());
-    }
-
-    private boolean stoppedSuccessfully(String stopCommandResponse) {
-        return stopCommandResponse.startsWith(facadeConfig.getSuccessfulStopCommandResponse());
     }
 
     private static boolean shouldIncludeThread(Thread thread, String includedThreadsName) {

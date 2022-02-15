@@ -1,11 +1,17 @@
 package com.taboola.async_profiler.api.facade;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.taboola.async_profiler.api.original.Events;
+import com.taboola.async_profiler.api.original.Format;
 
 public class AsyncProfilerCommandsFactoryTest {
 
@@ -18,57 +24,59 @@ public class AsyncProfilerCommandsFactoryTest {
 
     @Test
     public void testCreateStartCommand() {
-        String file = "f";
+        String file = "f.ext";
         ProfileRequest profileRequest = new ProfileRequest();
-        profileRequest.setEventType("cpu");
-        profileRequest.setFormat("flamegraph");
         profileRequest.setSamplingInterval(1);
-        profileRequest.setFrameBufferSize(10);
         String command = commandFactory.createStartCommand(profileRequest, file);
 
-        assertEquals("start,event=cpu,file=f,flamegraph,interval=1000000,framebuf=10", command);
+        assertEquals("start,event=cpu,file=f.ext,flamegraph,interval=1000000", command);
     }
 
     @Test
-    public void testCreateStartCommandWithTimeUnit() {
+    public void testCreateStartCommandWithFormat() {
         String file = "f";
         ProfileRequest profileRequest = new ProfileRequest();
-        profileRequest.setEventType("cpu");
-        profileRequest.setFormat("flamegraph");
+        profileRequest.setFormat(Format.COLLAPSED);
         profileRequest.setSamplingInterval(1);
         profileRequest.setSamplingIntervalTimeUnit(TimeUnit.NANOSECONDS);
-        profileRequest.setFrameBufferSize(10);
         String command = commandFactory.createStartCommand(profileRequest, file);
 
-        assertEquals("start,event=cpu,file=f,flamegraph,interval=1,framebuf=10", command);
+        assertEquals("start,event=cpu,file=f,collapsed,interval=1", command);
+    }
+
+    @Test
+    public void testCreateStartCommandWithMultipleEvents() {
+        String file = "f";
+        ProfileRequest profileRequest = new ProfileRequest();
+        profileRequest.setEvents(new LinkedHashSet<String>(){{add(Events.ALLOC);add(Events.LOCK);add(Events.CPU);}});
+        profileRequest.setSamplingInterval(1);
+        profileRequest.setSamplingIntervalTimeUnit(TimeUnit.NANOSECONDS);
+        String command = commandFactory.createStartCommand(profileRequest, file);
+
+        assertEquals("start,event=alloc,lock,cpu,file=f,jfr,interval=1,alloc=10000,lock=1", command);
     }
 
     @Test
     public void testCreateStartCommand_whenHasIncludedThreads_shouldAddFilterFlag() {
         String file = "f";
         ProfileRequest profileRequest = new ProfileRequest();
-        profileRequest.setEventType("cpu");
-        profileRequest.setFormat("flamegraph");
         profileRequest.setSamplingInterval(1);
-        profileRequest.setFrameBufferSize(10);
         profileRequest.setIncludedThreads("a");
         String command = commandFactory.createStartCommand(profileRequest, file);
 
-        assertEquals("start,event=cpu,file=f,flamegraph,interval=1000000,framebuf=10,filter", command);
+        assertEquals("start,event=cpu,file=f,flamegraph,interval=1000000,filter", command);
     }
 
     @Test
     public void testCreateStartCommand_whenEventIsAlloc_intervalShouldBeTakenFromIntervalBytes() {
         String file = "f";
         ProfileRequest profileRequest = new ProfileRequest();
-        profileRequest.setEventType("alloc");
-        profileRequest.setFormat("flamegraph");
+        profileRequest.setEvents(new HashSet<String>(){{add(Events.ALLOC);}});
         profileRequest.setSamplingInterval(1);
-        profileRequest.setSamplingIntervalBytes(2);
-        profileRequest.setFrameBufferSize(10);
+        profileRequest.setAllocIntervalBytes(2);
         String command = commandFactory.createStartCommand(profileRequest, file);
 
-        assertEquals("start,event=alloc,file=f,flamegraph,interval=2,framebuf=10", command);
+        assertEquals("start,event=alloc,file=f,flamegraph,interval=1000000,alloc=2", command);
     }
 
     @Test
@@ -79,7 +87,7 @@ public class AsyncProfilerCommandsFactoryTest {
         assertThrows("File path must not be empty", IllegalArgumentException.class, () -> commandFactory.createStartCommand(finalProfileRequest, ""));
 
         profileRequest = new ProfileRequest();
-        profileRequest.setEventType("");
+        profileRequest.setEvents(null);
         ProfileRequest finalProfileRequest1 = profileRequest;
         assertThrows("Event type is required", IllegalArgumentException.class, () -> commandFactory.createStartCommand(finalProfileRequest1, "a"));
 
@@ -98,12 +106,11 @@ public class AsyncProfilerCommandsFactoryTest {
     public void testCreateStopCommand() {
         String file = "f";
         ProfileRequest profileRequest = new ProfileRequest();
-        profileRequest.setFormat("flame");
         profileRequest.setIncludedTraces("included");
         profileRequest.setExcludedTraces("excluded");
         String command = commandFactory.createStopCommand(profileRequest, file, "abc");
 
-        assertEquals("stop,file=f,flame,include=included,exclude=excluded,title=abc", command);
+        assertEquals("stop,file=f,flamegraph,include=included,exclude=excluded,title=abc", command);
     }
 
     @Test

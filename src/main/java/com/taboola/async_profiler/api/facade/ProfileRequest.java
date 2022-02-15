@@ -22,6 +22,7 @@ public class ProfileRequest {
     String includedThreads;
     String includedTraces;
     String excludedTraces;
+    String jfrSync;
 
     public Format getFormat() {
         if (events != null && events.size() > 1) {

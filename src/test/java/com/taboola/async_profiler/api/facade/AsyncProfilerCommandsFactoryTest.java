@@ -45,6 +45,24 @@ public class AsyncProfilerCommandsFactoryTest {
     }
 
     @Test
+    public void testCreateStartCommandWithJFRSync() {
+        String file = "f";
+        ProfileRequest profileRequest = new ProfileRequest();
+        profileRequest.setFormat(Format.COLLAPSED);
+        profileRequest.setSamplingInterval(1);
+        profileRequest.setSamplingIntervalTimeUnit(TimeUnit.NANOSECONDS);
+        profileRequest.setJfrSync("");
+        String command = commandFactory.createStartCommand(profileRequest, file);
+
+        assertEquals("start,event=cpu,file=f,collapsed,interval=1,jfrsync", command);
+
+        profileRequest.setJfrSync("default");
+        command = commandFactory.createStartCommand(profileRequest, file);
+
+        assertEquals("start,event=cpu,file=f,collapsed,interval=1,jfrsync=default", command);
+    }
+
+    @Test
     public void testCreateStartCommandWithMultipleEvents() {
         String file = "f";
         ProfileRequest profileRequest = new ProfileRequest();

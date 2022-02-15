@@ -3,7 +3,6 @@ package com.taboola.async_profiler.api.facade;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 
@@ -28,5 +27,17 @@ public class ProfileRequestTest {
         assertNull(profileRequest.getIncludedTraces());
         assertNull(profileRequest.getExcludedTraces());
         assertNull(profileRequest.getIncludedThreads());
+    }
+
+    @Test
+    public void testGetFormat() {
+        ProfileRequest profileRequest = new ProfileRequest();
+        assertEquals(Format.FLAMEGRAPH, profileRequest.getFormat());
+
+        profileRequest.setFormat(Format.COLLAPSED);
+        assertEquals(Format.COLLAPSED, profileRequest.getFormat());
+
+        profileRequest.setEvents(new HashSet<String>(){{add(Events.CPU);add(Events.ALLOC);}});
+        assertEquals(Format.JFR, profileRequest.getFormat());
     }
 }

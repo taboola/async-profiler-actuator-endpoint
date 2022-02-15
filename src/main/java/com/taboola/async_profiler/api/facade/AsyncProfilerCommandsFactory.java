@@ -1,7 +1,5 @@
 package com.taboola.async_profiler.api.facade;
 
-import java.util.stream.Collectors;
-
 import com.taboola.async_profiler.api.original.Events;
 
 /**
@@ -33,6 +31,15 @@ public class AsyncProfilerCommandsFactory {
         if (profileRequest.getEvents().contains(Events.LOCK) && profileRequest.getLockThresholdNanos() != null) {
             stringBuilder.append(",lock=");
             stringBuilder.append(profileRequest.getLockThresholdNanos());
+        }
+
+        if (profileRequest.getJfrSync() != null) {
+            if (profileRequest.getJfrSync().isEmpty()) {
+                stringBuilder.append(",jfrsync");
+            } else {
+                stringBuilder.append(",jfrsync=");
+                stringBuilder.append(profileRequest.getJfrSync());
+            }
         }
 
         if (profileRequest.getIncludedThreads() != null) {

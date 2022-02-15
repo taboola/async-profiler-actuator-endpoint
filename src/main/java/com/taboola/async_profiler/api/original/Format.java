@@ -6,7 +6,6 @@ public enum Format {
     COLLAPSED(false),
     FLAMEGRAPH(false),
     TREE(false),
-    SVG(false),
     JFR(true);
 
     private boolean binary;

@@ -1,3 +1,4 @@
 *.class
 .idea/
+bin/
 *.iml

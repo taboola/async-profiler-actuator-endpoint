@@ -50,6 +50,7 @@
         <com.taboola.spring.version>4.3.23.RELEASE</com.taboola.spring.version>
         <com.taboola.spring.boot.version>1.5.20.RELEASE</com.taboola.spring.boot.version>
         <com.taboola.lombok.version>1.18.10</com.taboola.lombok.version>
+        <async.profiler.version>2.7</async.profiler.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
@@ -95,6 +96,28 @@
 
     <build>
         <plugins>
+
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <id>Run Bootstrap Script</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>bootstrap.sh</executable>
+                            <arguments>
+                                <argument>${async.profiler.version}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -158,6 +181,7 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>

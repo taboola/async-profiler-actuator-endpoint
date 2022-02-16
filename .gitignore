@@ -1,4 +1,6 @@
 *.class
 .idea/
-bin/
 *.iml
+bin/
+target/
+src/main/resources/async-profiler-libs

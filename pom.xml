@@ -53,6 +53,7 @@
         <async.profiler.version>2.7</async.profiler.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <skip.bootstrap>false</skip.bootstrap>
     </properties>
 
     <dependencies>
@@ -109,6 +110,7 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
+                            <skip>${skip.bootstrap}</skip>
                             <executable>bootstrap.sh</executable>
                             <arguments>
                                 <argument>${async.profiler.version}</argument>

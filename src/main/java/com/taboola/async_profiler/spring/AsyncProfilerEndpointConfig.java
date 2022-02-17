@@ -18,8 +18,8 @@ import com.taboola.async_profiler.utils.ThreadUtils;
 public class AsyncProfilerEndpointConfig {
 
     @Bean
-    public AsyncProfilerSupplier asyncProfilerSupplier(AsyncProfilerEndpointConfigurations asyncProfilerConfig) {
-        return new AsyncProfilerSupplier(asyncProfilerConfig.getLibPath());
+    public AsyncProfilerSupplier asyncProfilerSupplier(IOUtils ioUtils, AsyncProfilerEndpointConfigurations asyncProfilerConfig) {
+        return new AsyncProfilerSupplier(ioUtils, asyncProfilerConfig.getLibPath());
     }
 
     @Bean

@@ -7,15 +7,20 @@ import java.io.IOException;
  * */
 public class EmptyAsyncProfiler implements AsyncProfiler {
 
-    private static final String ERROR_MESSAGE = "Failed loading async profiler lib";
+    private static final String ERROR_MESSAGE = "Failed loading async profiler lib: ";
+    private final Throwable cause;
+
+    public EmptyAsyncProfiler(Throwable cause) {
+        this.cause = cause;
+    }
 
     @Override
     public String execute(String command) throws IllegalArgumentException, IOException {
-        throw new IllegalStateException(ERROR_MESSAGE);
+        throw new IllegalStateException(ERROR_MESSAGE + cause.getMessage(), cause);
     }
 
     @Override
     public void addThread(Thread thread) {
-        throw new IllegalStateException(ERROR_MESSAGE);
+        throw new IllegalStateException(ERROR_MESSAGE + cause.getMessage(), cause);
     }
 }

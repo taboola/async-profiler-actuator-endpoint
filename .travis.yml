@@ -1,4 +1,5 @@
-install: mvn install -Dgpg.skip -Dskip.bootstrap
+install: mvn install -DskipTests -Dgpg.skip -Dskip.bootstrap
+script: mvn test -Dgpg.skip -Dskip.bootstrap
 language: java
 jdk:
   - openjdk8

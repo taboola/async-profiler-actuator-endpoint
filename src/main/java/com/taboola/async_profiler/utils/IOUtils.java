@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class IOUtils {
 
@@ -37,6 +38,10 @@ public class IOUtils {
         File file = File.createTempFile(prefix, suffix);
         file.deleteOnExit();
         return file.getAbsolutePath();
+    }
+
+    public void copy(InputStream inputStream, String path) throws IOException {
+        Files.copy(inputStream, Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
     }
 
     public int copy(InputStream inputStream, OutputStream outputStream) throws IOException {

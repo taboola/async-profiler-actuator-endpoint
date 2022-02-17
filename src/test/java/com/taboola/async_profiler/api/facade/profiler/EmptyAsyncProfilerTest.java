@@ -11,16 +11,16 @@ public class EmptyAsyncProfilerTest {
 
     @Before
     public void setup() {
-        emptyAsyncProfiler = new EmptyAsyncProfiler();
+        emptyAsyncProfiler = new EmptyAsyncProfiler(new Throwable());
     }
 
     @Test
     public void testExecuteShouldThrow() {
-        assertThrows("Failed loading async profiler lib", IllegalStateException.class, () -> emptyAsyncProfiler.execute("start"));
+        assertThrows(IllegalStateException.class, () -> emptyAsyncProfiler.execute("start"));
     }
 
     @Test
     public void testAddThreadShouldThrow() {
-        assertThrows("Failed loading async profiler lib", IllegalStateException.class, () -> emptyAsyncProfiler.addThread(Thread.currentThread()));
+        assertThrows(IllegalStateException.class, () -> emptyAsyncProfiler.addThread(Thread.currentThread()));
     }
 }

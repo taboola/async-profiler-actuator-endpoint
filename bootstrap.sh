@@ -4,7 +4,7 @@ echo "##### Starting bootstrap script #####"
 export LANG=en_US.UTF-8
 export LC_ALL=$LANG
 
-assets_suffixes=("linux-arm64.tar.gz" "linux-musl-x64.tar.gz" "linux-x64.tar.gz" "macos.zip")
+assets_suffixes=("linux-arm64.tar.gz" "linux-x64.tar.gz" "macos.zip")
 asset_name_prefix="async-profiler-$1-"
 asset_url_prefix="https://github.com/jvm-profiling-tools/async-profiler/releases/download/v$1/$asset_name_prefix"
 binaries_dir="bin/"

@@ -105,7 +105,7 @@
                 <executions>
                     <execution>
                         <id>Run Bootstrap Script</id>
-                        <phase>initialize</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>

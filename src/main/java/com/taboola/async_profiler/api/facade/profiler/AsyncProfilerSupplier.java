@@ -47,18 +47,18 @@ public class AsyncProfilerSupplier {
         final String osName = System.getProperty("os.name");
         final String osArch = System.getProperty("os.arch");
 
-        if ("Linux".equals(osName)) {
-            if ("x86_64".equals(osArch)) {
-                return "linux-x64";
-            } else if ("arm64".equals(osArch)) {
+        if (osName != null && osName.startsWith("Linux")) {
+            if (osArch != null && osArch.contains("arm")) {
                 return "linux-arm64";
+            } else if (osArch != null && osArch.contains("64")) {
+                return "linux-x64";
             } else {
-                throw new RuntimeException("Unsupported Arch " + osArch);
+                throw new RuntimeException("Unsupported Arch: " + osArch);
             }
-        } else if ("Mac OS X".equals(osName)) {
+        } else if (osName != null && osName.startsWith("Mac")) {
             return "macos";
         } else {
-            throw new RuntimeException("Unsupported OS " + osName);
+            throw new RuntimeException("Unsupported OS: " + osName);
         }
     }
 }

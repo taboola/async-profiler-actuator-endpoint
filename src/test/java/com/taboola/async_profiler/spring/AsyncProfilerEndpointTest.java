@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.Collections;
 
 import org.junit.Before;
@@ -22,7 +23,7 @@ import org.springframework.core.io.InputStreamSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
-import com.taboola.async_profiler.api.facade.AsyncProfilerFacade;
+import com.taboola.async_profiler.api.AsyncProfilerService;
 import com.taboola.async_profiler.api.facade.ProfileRequest;
 import com.taboola.async_profiler.api.facade.ProfileResult;
 import com.taboola.async_profiler.api.original.Format;
@@ -30,73 +31,77 @@ import com.taboola.async_profiler.api.original.Format;
 public class AsyncProfilerEndpointTest {
 
     @Mock
-    private AsyncProfilerFacade asyncProfilerFacade;
+    private AsyncProfilerService asyncProfilerService;
 
     private AsyncProfilerEndpoint asyncProfilerEndPoint;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        asyncProfilerEndPoint = new AsyncProfilerEndpoint(asyncProfilerFacade, false);
+        asyncProfilerEndPoint = new AsyncProfilerEndpoint(asyncProfilerService, false);
     }
 
     @Test
     public void testProfile() throws IOException {
         ProfileRequest profileRequest = mock(ProfileRequest.class);
         InputStream inputStream = mock(InputStream.class);
-        ProfileResult profileResult = new ProfileResult(inputStream, Format.FLAMEGRAPH);
-        when(asyncProfilerFacade.profile(same(profileRequest))).thenReturn(profileResult);
+        ProfileResult profileResult = new ProfileResult(profileRequest, inputStream, LocalDateTime.now(), LocalDateTime.now());
+        when(profileRequest.getFormat()).thenReturn(Format.FLAMEGRAPH);
+        when(asyncProfilerService.profile(same(profileRequest))).thenReturn(profileResult);
 
         ResponseEntity result = asyncProfilerEndPoint.profile(profileRequest);
 
-        assertSame(inputStream, ((InputStreamSource)result.getBody()).getInputStream());
+        assertSame(inputStream, ((InputStreamSource) result.getBody()).getInputStream());
         assertEquals(0, result.getHeaders().size());
-        verify(asyncProfilerFacade, times(1)).profile(same(profileRequest));
+        verify(asyncProfilerService, times(1)).profile(same(profileRequest));
     }
 
     @Test
     public void testProfileWithBinaryFormatResult() throws IOException {
         ProfileRequest profileRequest = mock(ProfileRequest.class);
         InputStream inputStream = mock(InputStream.class);
-        ProfileResult profileResult = new ProfileResult(inputStream, Format.JFR);
-        when(asyncProfilerFacade.profile(same(profileRequest))).thenReturn(profileResult);
+        ProfileResult profileResult = new ProfileResult(profileRequest, inputStream, LocalDateTime.now(), LocalDateTime.now());
+        when(profileRequest.getFormat()).thenReturn(Format.JFR);
+        when(asyncProfilerService.profile(same(profileRequest))).thenReturn(profileResult);
 
         ResponseEntity result = asyncProfilerEndPoint.profile(profileRequest);
 
-        assertSame(inputStream, ((InputStreamSource)result.getBody()).getInputStream());
+        assertSame(inputStream, ((InputStreamSource) result.getBody()).getInputStream());
         assertEquals(1, result.getHeaders().size());
         assertEquals(Collections.singletonList("attachment; filename=profile.jfr"), result.getHeaders().get(HttpHeaders.CONTENT_DISPOSITION));
-        verify(asyncProfilerFacade, times(1)).profile(same(profileRequest));
+        verify(asyncProfilerService, times(1)).profile(same(profileRequest));
     }
 
     @Test
     public void testStop() throws IOException {
+        ProfileRequest profileRequest = mock(ProfileRequest.class);
         InputStream inputStream = mock(InputStream.class);
-        ProfileResult profileResult = new ProfileResult(inputStream, Format.FLAMEGRAPH);
-        when(asyncProfilerFacade.stop()).thenReturn(profileResult);
+        ProfileResult profileResult = new ProfileResult(profileRequest, inputStream, LocalDateTime.now(), LocalDateTime.now());
+        when(profileRequest.getFormat()).thenReturn(Format.FLAMEGRAPH);
+        when(asyncProfilerService.stop()).thenReturn(profileResult);
 
         ResponseEntity result = asyncProfilerEndPoint.stop();
 
-        assertSame(inputStream, ((InputStreamSource)result.getBody()).getInputStream());
+        assertSame(inputStream, ((InputStreamSource) result.getBody()).getInputStream());
         assertEquals(0, result.getHeaders().size());
-        verify(asyncProfilerFacade, times(1)).stop();
+        verify(asyncProfilerService, times(1)).stop();
     }
 
     @Test
     public void testGetSupportedEvents() {
-        when(asyncProfilerFacade.getSupportedEvents()).thenReturn("cpu");
+        when(asyncProfilerService.getSupportedEvents()).thenReturn("cpu");
         assertEquals("cpu", asyncProfilerEndPoint.getSupportedEvents());
     }
 
     @Test
     public void testGetVersion() {
-        when(asyncProfilerFacade.getProfilerVersion()).thenReturn("1");
+        when(asyncProfilerService.getProfilerVersion()).thenReturn("1");
         assertEquals("1", asyncProfilerEndPoint.getVersion());
     }
 
     @Test
     public void testIsSensitive() {
-        assertFalse(new AsyncProfilerEndpoint(asyncProfilerFacade, false).isSensitive());
-        assertTrue(new AsyncProfilerEndpoint(asyncProfilerFacade, true).isSensitive());
+        assertFalse(new AsyncProfilerEndpoint(asyncProfilerService, false).isSensitive());
+        assertTrue(new AsyncProfilerEndpoint(asyncProfilerService, true).isSensitive());
     }
 }

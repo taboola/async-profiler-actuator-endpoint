@@ -125,20 +125,24 @@ public class AsyncProfilerFacade {
     }
 
     private ProfileResult stopInternal(ProfileContext profileContext) throws IOException {
+        LocalDateTime endTime = LocalDateTime.now();
         String stopCommand = asyncProfilerCommandsFactory.createStopCommand(profileContext.getProfileRequest(),
                 profileContext.getTmpFilePath(),
-                buildTitleIfNeeded(profileContext.getProfileRequest(), profileContext.getStartTime()));
+                buildTitleIfNeeded(profileContext.getProfileRequest(), profileContext.getStartTime(), endTime));
 
         asyncProfiler.execute(stopCommand);
 
         InputStream resultInputStream = ioUtils.getDisposableFileInputStream(profileContext.getTmpFilePath());
-        return new ProfileResult(resultInputStream, profileContext.getProfileRequest().getFormat());
+        return new ProfileResult(profileContext.getProfileRequest(),
+                resultInputStream,
+                profileContext.getStartTime(),
+                endTime);
     }
 
-    private String buildTitleIfNeeded(ProfileRequest profileRequest, LocalDateTime startTime) {
+    private String buildTitleIfNeeded(ProfileRequest profileRequest, LocalDateTime startTime, LocalDateTime endTime) {
         String title = null;
         if (Format.FLAMEGRAPH.equals(profileRequest.getFormat())) {
-            title = String.format("%s Flame Graph (%s - %s)", profileRequest.getEvents(), startTime.format(formatter), LocalDateTime.now().format(formatter));
+            title = String.format("%s Flame Graph (%s - %s)", profileRequest.getEvents(), startTime.format(formatter), endTime.format(formatter));
         }
         return title;
     }

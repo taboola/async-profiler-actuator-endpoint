@@ -8,7 +8,6 @@ import lombok.Value;
 @Value
 public class ProfileResult implements AutoCloseable {
     ProfileRequest request;
-
     InputStream resultInputStream;
     LocalDateTime startTime;
     LocalDateTime endTime;

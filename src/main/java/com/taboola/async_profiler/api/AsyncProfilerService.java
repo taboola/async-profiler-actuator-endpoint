@@ -9,6 +9,7 @@ import com.taboola.async_profiler.api.continuous.ProfileSnapshotsReporter;
 import com.taboola.async_profiler.api.facade.AsyncProfilerFacade;
 import com.taboola.async_profiler.api.facade.ProfileRequest;
 import com.taboola.async_profiler.api.facade.ProfileResult;
+import com.taboola.async_profiler.api.serviceconfig.AsyncProfilerServiceConfigurations;
 import com.taboola.async_profiler.utils.RecurringRunnable;
 import com.taboola.async_profiler.utils.ThreadUtils;
 
@@ -27,7 +28,7 @@ public class AsyncProfilerService {
                                 ProfileSnapshotsReporter snapshotsReporter,
                                 ExecutorService continuousProfilingExecutorService,
                                 ExecutorService snapshotsReporterExecutorService,
-                                AsyncProfilerConfigurations asyncProfilerConfigurations,
+                                AsyncProfilerServiceConfigurations asyncProfilerConfigurations,
                                 ThreadUtils threadUtils) {
         this.asyncProfilerFacade = asyncProfilerFacade;
         this.snapshotsReporter = snapshotsReporter;
@@ -49,9 +50,9 @@ public class AsyncProfilerService {
     public void startContinuousProfiling(ProfileRequest profileSnapshotRequest) {
         synchronized (lock) {
             if (currentContinuousProfilingTask == null) {
-                RecurringRunnable profilingTask = new RecurringRunnable(() -> getProfileSnapshotAndSubmitToReporter(profileSnapshotRequest));
-                continuousProfilingExecutorService.submit(profilingTask);
-                currentContinuousProfilingTask = profilingTask;
+                RecurringRunnable continuousProfilingTask = new RecurringRunnable(() -> profileAndReportSnapshot(profileSnapshotRequest));
+                continuousProfilingExecutorService.submit(continuousProfilingTask);
+                currentContinuousProfilingTask = continuousProfilingTask;
             } else {
                 throw new IllegalStateException("Failed starting continuous profiling, there is already an active session");
             }
@@ -78,10 +79,10 @@ public class AsyncProfilerService {
     }
 
     @SneakyThrows
-    private void getProfileSnapshotAndSubmitToReporter(ProfileRequest profileSnapshotRequest) {
+    private void profileAndReportSnapshot(ProfileRequest profileSnapshotRequest) {
         try {
             ProfileResult profileSnapshotResult = asyncProfilerFacade.profile(profileSnapshotRequest);
-            submitToReporter(profileSnapshotResult);
+            reportAsync(profileSnapshotResult);
 
         } catch (RuntimeException ex) {
             //sleep for backoff seconds if the profiler has failed or if we failed to submit the result to the reporter executor service
@@ -90,7 +91,7 @@ public class AsyncProfilerService {
         }
     }
 
-    private void submitToReporter(ProfileResult profileSnapshotResult) {
+    private void reportAsync(ProfileResult profileSnapshotResult) {
         try {
             snapshotsReporterExecutorService.submit(() -> reportSnapshot(profileSnapshotResult));
         } catch (Exception ex) {

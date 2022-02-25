@@ -2,7 +2,6 @@ package com.taboola.async_profiler.api.continuous.pyroscope;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -59,21 +58,17 @@ public class PyroscopeReporter implements ProfileSnapshotsReporter {
         }
     }
 
-    //build the http request and return the corresponding connection
     private HttpURLConnection createPyroscopeIngestRequest(ProfileResult profileSnapshot) throws IOException {
-        URL requestUrl = netUtils.buildUrl(config.getPyroscopeServerAddress(), config.getPyroscopeServerIngestPath(), asQueryParamsMap(config, profileSnapshot));
+        HttpURLConnection httpURLConnection = netUtils.getHTTPConnection(config.getPyroscopeServerAddress(),
+                config.getPyroscopeServerIngestPath(),
+                asQueryParamsMap(config, profileSnapshot),
+                "POST",
+                config.getConnectTimeout(),
+                config.getReadTimeout());
 
-        //cached connection
-        HttpURLConnection conn = (HttpURLConnection) requestUrl.openConnection();
-        conn.setDoOutput(true);
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Connection", "keep-alive");
-        conn.setConnectTimeout(config.getConnectTimeout());
-        conn.setReadTimeout(config.getReadTimeout());
+        ioUtils.copy(profileSnapshot.getResultInputStream(), httpURLConnection.getOutputStream());
 
-        ioUtils.copy(profileSnapshot.getResultInputStream(), conn.getOutputStream());
-
-        return conn;
+        return httpURLConnection;
     }
 
     private Map<String, String> asQueryParamsMap(PyroscopeReporterConfig config, ProfileResult snapshot) {

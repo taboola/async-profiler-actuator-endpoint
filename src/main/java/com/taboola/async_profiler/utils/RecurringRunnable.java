@@ -1,5 +1,8 @@
 package com.taboola.async_profiler.utils;
 
+import lombok.Getter;
+
+@Getter
 public class RecurringRunnable implements Runnable {
 
     private final Runnable baseRunnable;

@@ -37,6 +37,10 @@ public class AsyncProfilerService {
         this.continuousProfilingFailureBackoffSeconds = asyncProfilerConfigurations.getContinuousProfiling().getFailureBackoffSeconds();
         this.threadUtils = threadUtils;
         this.lock = new Object();
+
+        if (asyncProfilerConfigurations.getContinuousProfiling().isStartOnInit()) {
+            startContinuousProfiling(asyncProfilerConfigurations.getContinuousProfiling().getSnapshotRequest());
+        }
     }
 
     public ProfileResult profile(ProfileRequest profileRequest) {

@@ -1,6 +1,8 @@
 package com.taboola.async_profiler.utils;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,6 +12,24 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class NetUtils {
+
+    public HttpURLConnection getHTTPConnection(String string,
+                                               String path,
+                                               Map<String, String> queryParams,
+                                               String requestMethod,
+                                               int connectTimeout,
+                                               int readTimeout) throws IOException {
+        URL requestUrl = buildUrl(string, path, queryParams);
+
+        HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();//cached connection
+        connection.setDoOutput(true);
+        connection.setRequestMethod(requestMethod);
+        connection.setRequestProperty("Connection", "keep-alive");
+        connection.setConnectTimeout(connectTimeout);
+        connection.setReadTimeout(readTimeout);
+
+        return connection;
+    }
 
     public URL buildUrl(String string, String path, Map<String, String> queryParams) {
         try {

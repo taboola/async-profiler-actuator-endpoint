@@ -92,10 +92,6 @@ public class AsyncProfilerEndpointConfig {
                 asyncProfilerConfig,
                 threadUtils);
 
-        if (asyncProfilerConfig.getContinuousProfiling().isStartOnInit()) {
-            asyncProfilerService.startContinuousProfiling(asyncProfilerConfig.getContinuousProfiling().getSnapshotRequest());
-        }
-
         return asyncProfilerService;
     }
 

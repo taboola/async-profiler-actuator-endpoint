@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 import com.taboola.async_profiler.api.AsyncProfilerService;
+import com.taboola.async_profiler.api.continuous.ContinuousProfilingSnapshotRequest;
 import com.taboola.async_profiler.api.facade.ProfileRequest;
 import com.taboola.async_profiler.api.facade.ProfileResult;
 import com.taboola.async_profiler.api.original.Format;
@@ -85,6 +86,22 @@ public class AsyncProfilerEndpointTest {
         assertSame(inputStream, ((InputStreamSource) result.getBody()).getInputStream());
         assertEquals(0, result.getHeaders().size());
         verify(asyncProfilerService, times(1)).stop();
+    }
+
+    @Test
+    public void testStartContinuousProfiling() {
+        ContinuousProfilingSnapshotRequest profileRequest = new ContinuousProfilingSnapshotRequest();
+
+        asyncProfilerEndPoint.startContinuous(profileRequest);
+
+        verify(asyncProfilerService, times(1)).startContinuousProfiling(same(profileRequest));
+    }
+
+    @Test
+    public void testStopContinuousProfiling() {
+        asyncProfilerEndPoint.stopContinuous();
+
+        verify(asyncProfilerService, times(1)).stopContinuousProfiling();
     }
 
     @Test

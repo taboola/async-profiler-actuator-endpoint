@@ -34,8 +34,8 @@ public class AsyncProfilerSupplier {
      * @return the path to extracted file, if any
      * */
     private String unpackBundledLib(IOUtils ioUtils) throws IOException {
-        String envName = detectEnvironment();
-        try (final InputStream inputStream = AsyncProfilerSupplier.class.getResourceAsStream("/async-profiler-libs/" + envName + "/libasyncProfiler.so")) {
+        String osEnvName = detectOSEnvironment();
+        try (final InputStream inputStream = AsyncProfilerSupplier.class.getResourceAsStream("/async-profiler-libs/" + osEnvName + "/libasyncProfiler.so")) {
             String pathToLib = ioUtils.createTempFile("libasyncProfiler", ".so");
             ioUtils.copy(inputStream, pathToLib);
 
@@ -43,7 +43,7 @@ public class AsyncProfilerSupplier {
         }
     }
 
-    private static String detectEnvironment() {
+    static String detectOSEnvironment() {
         final String osName = System.getProperty("os.name");
         final String osArch = System.getProperty("os.arch");
 

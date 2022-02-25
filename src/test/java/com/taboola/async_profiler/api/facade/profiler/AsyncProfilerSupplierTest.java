@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.taboola.async_profiler.utils.IOUtils;
@@ -20,6 +21,7 @@ public class AsyncProfilerSupplierTest {
     }
 
     @Test
+    @Ignore("Use locally for manual tests")
     public void testGetProfiler_whenPathToLibIsMissing_shouldReturnBundledInstanceForCurrentEnv() {
         AsyncProfilerSupplier asyncProfilerSupplier = new AsyncProfilerSupplier(new IOUtils(),null);
 

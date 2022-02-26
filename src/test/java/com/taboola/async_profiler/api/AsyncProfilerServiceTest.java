@@ -114,6 +114,7 @@ public class AsyncProfilerServiceTest {
 
         asyncProfilerService.stopContinuousProfiling();
         assertTrue(continuousProfilingTask.isCancelled());
+        verify(asyncProfilerFacade, times(1)).stop();
     }
 
     @Test

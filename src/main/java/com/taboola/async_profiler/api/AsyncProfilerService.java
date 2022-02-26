@@ -68,6 +68,7 @@ public class AsyncProfilerService {
             if (currentContinuousProfilingTask != null) {
                 currentContinuousProfilingTask.cancel();
                 currentContinuousProfilingTask = null;
+                safeStop();
             } else {
                 throw new IllegalStateException("There is no active continuous profiling session");
             }
@@ -116,5 +117,11 @@ public class AsyncProfilerService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void safeStop() {
+        try {
+            stop();
+        } catch (RuntimeException e) {}
     }
 }

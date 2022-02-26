@@ -7,22 +7,30 @@ This project contains a spring boot actuator endpoint implementation which serve
 
 It allows controlling the profiler via simple HTTP GET requests to the profiled service itself. 
 
-One can either send a blocking profile request and get the flame graph result in the response, or send a non-blocking request to start a continuous-profiling session which will periodically report profile snapshots to a dedicated reporter (this project comes with a default [Pyroscope](https://github.com/pyroscope-io/pyroscope) reporter implementation to report it to some configurable Pyroscope server, but you can override it with your own custom implementation). 
+You can either send a blocking profile request and get the flame graph in the response, or send a non-blocking request to start a continuous-profiling session which will periodically report profile snapshots to a dedicated reporter. 
 
-#### Async Profiler Library:
+#### Async Profiler Library
 The profiler library is already bundled in this project. If you want to use your own custom version, you can just override it by configuring the path to yours, e.g: 
-```com.taboola.asyncProfiler.libPath=/opt/async-profiler/build/libasyncProfiler.so.```
+```com.taboola.asyncProfiler.libPath=/opt/async-profiler/build/libasyncProfiler.so```
 
-#### Continuous Profiling:
+#### Continuous Profiling
 As mentioned above, we also support continuous profiling to periodically run the profiler and report the results to a dedicated reporter.
-The default reporter is PyroscopeReporter, but you can also create a different ProfileSnapshotsReporter bean to override the default with your own custom implementation.
+We provide a default PyroscopeReporter, to report the snapshots to a configurable [Pyroscope](https://github.com/pyroscope-io/pyroscope) server, but you can also create a different ProfileSnapshotsReporter bean to override the default one with your own custom implementation.
+
 You can start/stop the session from the endpoint, but you can also configure it to start automatically when the service starts by configuring:
 ```com.taboola.asyncProfiler.continuousProfiling.startOnInit=true```
 
 
-#### Wiring The Endpoint:
+#### Getting Started
+Add the dependency:
+```
+<dependency>
+  <groupId>com.taboola</groupId>
+  <artifactId>async-profiler-actuator-endpoint</artifactId>
+</dependency>
+```
 
-To wire it into your app, just include the endpoint configuration class in your application context configuration class, e.g:
+Wire it into your app by including the endpoint configuration class in your application context configuration class, e.g:
 ```
 @Configuration
 @Import(AsyncProfilerEndpointConfig.class) 
@@ -30,10 +38,10 @@ public class YourSpringConfigurationClass {
 }
 ```
 
-#### Endpoints:
+#### Endpoints
 1. `/async-profiler/profile` - to profile the service and get the flame graph in the response (blocking call, default is cpu profiling for 60sec).
     
-    Or, for example, profile multiple events together and get it as a .jfr file in the response:
+    Or, for example, profile multiple events together for 30 seconds and get it as a .jfr file attachment in the response:
 
    `/async-profiler/profile?events=alloc,cpu,lock&durationSeconds=30`
 

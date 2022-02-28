@@ -15,7 +15,7 @@ The profiler library is already bundled in this project. If you want to use your
 
 #### Continuous Profiling
 As mentioned above, we also support continuous profiling to periodically run the profiler and report the results to a dedicated reporter.
-We provide a default PyroscopeReporter, to report the snapshots to a configurable [Pyroscope](https://github.com/pyroscope-io/pyroscope) server, but you can also create a different ProfileSnapshotsReporter bean to override the default one with your own custom implementation.
+We provide a default PyroscopeReporter, to report the snapshots to a configurable [Pyroscope](https://github.com/pyroscope-io/pyroscope) server, but you can also create a different ProfileResultsReporter bean to override the default one with your own custom implementation.
 
 You can start/stop the session from the endpoint, but you can also configure it to start automatically when the service starts by configuring:
 ```com.taboola.asyncProfiler.continuousProfiling.startOnInit=true```

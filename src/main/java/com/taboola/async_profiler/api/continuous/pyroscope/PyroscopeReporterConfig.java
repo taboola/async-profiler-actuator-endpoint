@@ -8,6 +8,6 @@ public class PyroscopeReporterConfig {
     String appName;
     String pyroscopeServerIngestPath = "/ingest";
     String spyName = "asyncProfilerActuatorEndpoint";
-    int connectTimeout = 30_000;
-    int readTimeout = 30_000;
+    int connectTimeoutMillis = 30_000;
+    int readTimeoutMillis = 30_000;
 }

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Lazy;
 
 import com.taboola.async_profiler.api.serviceconfig.AsyncProfilerServiceConfigurations;
 import com.taboola.async_profiler.api.AsyncProfilerService;
-import com.taboola.async_profiler.api.continuous.ProfileSnapshotsReporter;
+import com.taboola.async_profiler.api.continuous.ProfileResultsReporter;
 import com.taboola.async_profiler.api.continuous.pyroscope.PyroscopeReporter;
 import com.taboola.async_profiler.api.facade.AsyncProfilerCommandsFactory;
 import com.taboola.async_profiler.api.facade.AsyncProfilerFacade;
@@ -71,7 +71,7 @@ public class AsyncProfilerEndpointConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProfileSnapshotsReporter profileSnapshotsReporter(AsyncProfilerServiceConfigurations asyncProfilerConfigurations, IOUtils ioUtils, NetUtils netUtils) {
+    public ProfileResultsReporter profileSnapshotsReporter(AsyncProfilerServiceConfigurations asyncProfilerConfigurations, IOUtils ioUtils, NetUtils netUtils) {
         //using pyroscope reporter as the default reporter implementation
         //will get called only if no other ProfileSnapshotsReporter bean was provided
         return new PyroscopeReporter(asyncProfilerConfigurations.getContinuousProfiling().getPyroscopeReporter(), ioUtils, netUtils);
@@ -80,11 +80,11 @@ public class AsyncProfilerEndpointConfig {
     @Bean
     public AsyncProfilerService asyncProfilerService(AsyncProfilerFacade asyncProfilerFacade,
                                                      AsyncProfilerServiceConfigurations asyncProfilerConfig,
-                                                     ProfileSnapshotsReporter profileSnapshotsReporter,
+                                                     ProfileResultsReporter profileResultsReporter,
                                                      ThreadUtils threadUtils) {
         ExecutorServiceConfig snapshotsReporterExecutorServiceConf = asyncProfilerConfig.getContinuousProfiling().getSnapshotsReporterExecutorService();
         AsyncProfilerService asyncProfilerService = new AsyncProfilerService(asyncProfilerFacade,
-                profileSnapshotsReporter,
+                profileResultsReporter,
                 threadUtils.newDaemonsExecutorService(1, 1, 1),
                 threadUtils.newDaemonsExecutorService(snapshotsReporterExecutorServiceConf.getCorePoolSize(),
                         snapshotsReporterExecutorServiceConf.getMaxPoolSize(),

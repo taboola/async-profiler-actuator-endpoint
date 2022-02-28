@@ -71,8 +71,8 @@ public class PyroscopeReporterTest {
                 eq(config.getPyroscopeServerIngestPath()),
                 eq(expectedQueryParams),
                 eq("POST"),
-                eq(config.getConnectTimeout()),
-                eq(config.getReadTimeout()))).thenReturn(httpURLConnection);
+                eq(config.getConnectTimeoutMillis()),
+                eq(config.getReadTimeoutMillis()))).thenReturn(httpURLConnection);
 
         when(httpURLConnection.getOutputStream()).thenReturn(outputStream);
         when(httpURLConnection.getResponseCode()).thenReturn(200);
@@ -105,8 +105,8 @@ public class PyroscopeReporterTest {
                 eq(config.getPyroscopeServerIngestPath()),
                 eq(expectedQueryParams),
                 eq("POST"),
-                eq(config.getConnectTimeout()),
-                eq(config.getReadTimeout()))).thenReturn(httpURLConnection);
+                eq(config.getConnectTimeoutMillis()),
+                eq(config.getReadTimeoutMillis()))).thenReturn(httpURLConnection);
 
         when(httpURLConnection.getOutputStream()).thenReturn(outputStream);
         when(httpURLConnection.getResponseCode()).thenReturn(400);
@@ -131,8 +131,8 @@ public class PyroscopeReporterTest {
                 eq(config.getPyroscopeServerIngestPath()),
                 eq(expectedQueryParams),
                 eq("POST"),
-                eq(config.getConnectTimeout()),
-                eq(config.getReadTimeout()))).thenThrow(new IOException());
+                eq(config.getConnectTimeoutMillis()),
+                eq(config.getReadTimeoutMillis()))).thenThrow(new IOException());
 
         assertThrows(RuntimeException.class, () -> pyroscopeReporter.report(profileResult));
     }

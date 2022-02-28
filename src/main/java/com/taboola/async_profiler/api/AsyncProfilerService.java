@@ -5,7 +5,8 @@ import lombok.SneakyThrows;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.taboola.async_profiler.api.continuous.ProfileSnapshotsReporter;
+import com.taboola.async_profiler.api.continuous.ContinuousProfilingSnapshotRequest;
+import com.taboola.async_profiler.api.continuous.ProfileResultsReporter;
 import com.taboola.async_profiler.api.facade.AsyncProfilerFacade;
 import com.taboola.async_profiler.api.facade.ProfileRequest;
 import com.taboola.async_profiler.api.facade.ProfileResult;
@@ -16,7 +17,7 @@ import com.taboola.async_profiler.utils.ThreadUtils;
 public class AsyncProfilerService {
 
     private final AsyncProfilerFacade asyncProfilerFacade;
-    private final ProfileSnapshotsReporter snapshotsReporter;
+    private final ProfileResultsReporter profileResultsReporter;
     private final ExecutorService continuousProfilingExecutorService;
     private final ExecutorService snapshotsReporterExecutorService;
     private final long continuousProfilingFailureBackoffSeconds;
@@ -25,13 +26,13 @@ public class AsyncProfilerService {
     private RecurringRunnable currentContinuousProfilingTask;
 
     public AsyncProfilerService(AsyncProfilerFacade asyncProfilerFacade,
-                                ProfileSnapshotsReporter snapshotsReporter,
+                                ProfileResultsReporter profileResultsReporter,
                                 ExecutorService continuousProfilingExecutorService,
                                 ExecutorService snapshotsReporterExecutorService,
                                 AsyncProfilerServiceConfigurations asyncProfilerConfigurations,
                                 ThreadUtils threadUtils) {
         this.asyncProfilerFacade = asyncProfilerFacade;
-        this.snapshotsReporter = snapshotsReporter;
+        this.profileResultsReporter = profileResultsReporter;
         this.continuousProfilingExecutorService = continuousProfilingExecutorService;
         this.snapshotsReporterExecutorService = snapshotsReporterExecutorService;
         this.continuousProfilingFailureBackoffSeconds = asyncProfilerConfigurations.getContinuousProfiling().getFailureBackoffSeconds();
@@ -51,10 +52,10 @@ public class AsyncProfilerService {
         return asyncProfilerFacade.stop();
     }
 
-    public void startContinuousProfiling(ProfileRequest profileSnapshotRequest) {
+    public void startContinuousProfiling(ContinuousProfilingSnapshotRequest continuousProfilingSnapshotRequest) {
         synchronized (lock) {
             if (currentContinuousProfilingTask == null) {
-                RecurringRunnable continuousProfilingTask = new RecurringRunnable(() -> profileAndReportSnapshot(profileSnapshotRequest));
+                RecurringRunnable continuousProfilingTask = new RecurringRunnable(() -> profileAndReportSnapshot(continuousProfilingSnapshotRequest));
                 continuousProfilingExecutorService.submit(continuousProfilingTask);
                 currentContinuousProfilingTask = continuousProfilingTask;
             } else {
@@ -84,9 +85,9 @@ public class AsyncProfilerService {
     }
 
     @SneakyThrows
-    private void profileAndReportSnapshot(ProfileRequest profileSnapshotRequest) {
+    private void profileAndReportSnapshot(ContinuousProfilingSnapshotRequest continuousProfilingSnapshotRequest) {
         try {
-            ProfileResult profileSnapshotResult = asyncProfilerFacade.profile(profileSnapshotRequest);
+            ProfileResult profileSnapshotResult = asyncProfilerFacade.profile(continuousProfilingSnapshotRequest);
             reportAsync(profileSnapshotResult);
 
         } catch (RuntimeException ex) {
@@ -113,7 +114,7 @@ public class AsyncProfilerService {
 
     private void reportSnapshot(ProfileResult snapshotResult) {
         try (ProfileResult profileResult = snapshotResult) {
-            snapshotsReporter.report(profileResult);
+            profileResultsReporter.report(profileResult);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

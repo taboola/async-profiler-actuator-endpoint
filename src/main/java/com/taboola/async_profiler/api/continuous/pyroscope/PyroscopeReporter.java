@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.taboola.async_profiler.api.continuous.ProfileSnapshotsReporter;
+import com.taboola.async_profiler.api.continuous.ProfileResultsReporter;
 import com.taboola.async_profiler.api.facade.ProfileRequest;
 import com.taboola.async_profiler.api.facade.ProfileResult;
 import com.taboola.async_profiler.api.original.Events;
@@ -16,7 +16,7 @@ import com.taboola.async_profiler.api.original.Format;
 import com.taboola.async_profiler.utils.IOUtils;
 import com.taboola.async_profiler.utils.NetUtils;
 
-public class PyroscopeReporter implements ProfileSnapshotsReporter {
+public class PyroscopeReporter implements ProfileResultsReporter {
 
     private final PyroscopeReporterConfig config;
     private final IOUtils ioUtils;
@@ -31,11 +31,11 @@ public class PyroscopeReporter implements ProfileSnapshotsReporter {
     }
 
     @Override
-    public void report(ProfileResult snapshotProfileResult) {
-        validate(snapshotProfileResult);
+    public void report(ProfileResult profileResult) {
+        validate(profileResult);
 
         try {
-            HttpURLConnection conn = createPyroscopeIngestRequest(snapshotProfileResult);
+            HttpURLConnection conn = createPyroscopeIngestRequest(profileResult);
 
             int status = conn.getResponseCode();
             if (status >= 400) {
@@ -63,8 +63,8 @@ public class PyroscopeReporter implements ProfileSnapshotsReporter {
                 config.getPyroscopeServerIngestPath(),
                 asQueryParamsMap(config, profileSnapshot),
                 "POST",
-                config.getConnectTimeout(),
-                config.getReadTimeout());
+                config.getConnectTimeoutMillis(),
+                config.getReadTimeoutMillis());
 
         ioUtils.copy(profileSnapshot.getResultInputStream(), httpURLConnection.getOutputStream());
 

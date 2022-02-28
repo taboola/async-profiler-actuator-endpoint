@@ -25,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.taboola.async_profiler.api.continuous.ContinuousProfilingSnapshotRequest;
-import com.taboola.async_profiler.api.continuous.ProfileSnapshotsReporter;
+import com.taboola.async_profiler.api.continuous.ProfileResultsReporter;
 import com.taboola.async_profiler.api.facade.AsyncProfilerFacade;
 import com.taboola.async_profiler.api.facade.ProfileRequest;
 import com.taboola.async_profiler.api.facade.ProfileResult;
@@ -38,7 +38,7 @@ public class AsyncProfilerServiceTest {
     @Mock
     private AsyncProfilerFacade asyncProfilerFacade;
     @Mock
-    private ProfileSnapshotsReporter snapshotsReporter;
+    private ProfileResultsReporter profileResultsReporter;
     @Mock
     private ExecutorService continuousProfilingExecutorService;
     @Mock
@@ -52,7 +52,7 @@ public class AsyncProfilerServiceTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         config = new AsyncProfilerServiceConfigurations();
-        asyncProfilerService = new AsyncProfilerService(asyncProfilerFacade, snapshotsReporter, continuousProfilingExecutorService, snapshotsReporterExecutorService, config, threadUtils);
+        asyncProfilerService = new AsyncProfilerService(asyncProfilerFacade, profileResultsReporter, continuousProfilingExecutorService, snapshotsReporterExecutorService, config, threadUtils);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class AsyncProfilerServiceTest {
 
     @Test
     public void testStartAndStopContinuousProfiling() throws Exception {
-        ProfileRequest profileRequest = new ContinuousProfilingSnapshotRequest();
+        ContinuousProfilingSnapshotRequest profileRequest = new ContinuousProfilingSnapshotRequest();
         ProfileResult profileResult = new ProfileResult(profileRequest, mock(InputStream.class), null, null);
 
         when(asyncProfilerFacade.profile(eq(profileRequest))).thenReturn(profileResult);
@@ -108,7 +108,7 @@ public class AsyncProfilerServiceTest {
 
         reportingTask.run();
 
-        verify(snapshotsReporter, times(1)).report(eq(profileResult));
+        verify(profileResultsReporter, times(1)).report(eq(profileResult));
         verify(profileResult.getResultInputStream(), atLeast(1)).close();
         verifyNoMoreInteractions(asyncProfilerFacade);
 
@@ -124,7 +124,7 @@ public class AsyncProfilerServiceTest {
         when(asyncProfilerFacade.profile(eq(profileRequest))).thenReturn(profileResult);
         config.getContinuousProfiling().setStartOnInit(true);
 
-        asyncProfilerService = new AsyncProfilerService(asyncProfilerFacade, snapshotsReporter, continuousProfilingExecutorService, snapshotsReporterExecutorService, config, threadUtils);
+        asyncProfilerService = new AsyncProfilerService(asyncProfilerFacade, profileResultsReporter, continuousProfilingExecutorService, snapshotsReporterExecutorService, config, threadUtils);
 
         ArgumentCaptor<RecurringRunnable> recurringRunnableArgumentCaptor = ArgumentCaptor.forClass(RecurringRunnable.class);
         verify(continuousProfilingExecutorService, times(1)).submit(recurringRunnableArgumentCaptor.capture());
@@ -142,14 +142,14 @@ public class AsyncProfilerServiceTest {
 
         reportingTask.run();
 
-        verify(snapshotsReporter, times(1)).report(eq(profileResult));
+        verify(profileResultsReporter, times(1)).report(eq(profileResult));
         verify(profileResult.getResultInputStream(), atLeast(1)).close();
         verifyNoMoreInteractions(asyncProfilerFacade);
     }
 
     @Test
     public void testStartContinuousProfiling_whenAlreadyStarted_shouldThrow() throws Exception {
-        ProfileRequest profileRequest = new ContinuousProfilingSnapshotRequest();
+        ContinuousProfilingSnapshotRequest profileRequest = new ContinuousProfilingSnapshotRequest();
         ProfileResult profileResult = new ProfileResult(profileRequest, mock(InputStream.class), null, null);
 
         when(asyncProfilerFacade.profile(eq(profileRequest))).thenReturn(profileResult);

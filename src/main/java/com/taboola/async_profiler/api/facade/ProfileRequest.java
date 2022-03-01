@@ -7,9 +7,13 @@ import java.util.concurrent.TimeUnit;
 import com.taboola.async_profiler.api.original.Events;
 import com.taboola.async_profiler.api.original.Format;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProfileRequest {
     Set<String> events = new HashSet<String>(){{add(Events.CPU);}};
     Format format = Format.FLAMEGRAPH;

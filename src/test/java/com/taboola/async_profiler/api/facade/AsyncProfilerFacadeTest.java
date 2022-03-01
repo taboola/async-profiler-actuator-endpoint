@@ -64,7 +64,7 @@ public class AsyncProfilerFacadeTest {
         ProfileResult profileResult = asyncProfilerFacade.profile(profileRequest);
 
         assertSame(inputStreamMock, profileResult.getResultInputStream());
-        assertEquals(Format.FLAMEGRAPH, profileResult.getFormat());
+        assertEquals(Format.FLAMEGRAPH, profileResult.getRequest().getFormat());
 
         verify(ioUtils, times(1)).createTempFile(eq("tmpFile"), eq(".tmp"));
         verify(asyncProfiler, times(1)).execute(eq("start"));
@@ -92,7 +92,7 @@ public class AsyncProfilerFacadeTest {
         ProfileResult profileResult = asyncProfilerFacade.profile(profileRequest);
 
         assertSame(inputStreamMock, profileResult.getResultInputStream());
-        assertEquals(Format.FLAMEGRAPH, profileResult.getFormat());
+        assertEquals(Format.FLAMEGRAPH, profileResult.getRequest().getFormat());
 
         verify(ioUtils, times(1)).createTempFile(eq("tmpFile"), eq(".tmp"));
         verify(asyncProfiler, times(1)).execute(eq("start"));
@@ -152,7 +152,7 @@ public class AsyncProfilerFacadeTest {
         ProfileResult profileResult = asyncProfilerFacadeSpy.stop();
 
         assertSame(inputStreamMock, profileResult.getResultInputStream());
-        assertEquals(Format.FLAMEGRAPH, profileResult.getFormat());
+        assertEquals(Format.FLAMEGRAPH, profileResult.getRequest().getFormat());
 
         verify(asyncProfiler, times(1)).execute(eq("stop"));
         verify(originalRequestThread, times(1)).interrupt();

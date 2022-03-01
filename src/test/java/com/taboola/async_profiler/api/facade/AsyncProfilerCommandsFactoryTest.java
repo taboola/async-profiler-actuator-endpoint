@@ -71,7 +71,7 @@ public class AsyncProfilerCommandsFactoryTest {
         profileRequest.setSamplingIntervalTimeUnit(TimeUnit.NANOSECONDS);
         String command = commandFactory.createStartCommand(profileRequest, file);
 
-        assertEquals("start,event=alloc,lock,cpu,file=f,jfr,interval=1,alloc=10000,lock=1", command);
+        assertEquals("start,event=cpu,alloc=10000,lock=1,file=f,jfr,interval=1", command);
     }
 
     @Test
@@ -94,7 +94,7 @@ public class AsyncProfilerCommandsFactoryTest {
         profileRequest.setAllocIntervalBytes(2);
         String command = commandFactory.createStartCommand(profileRequest, file);
 
-        assertEquals("start,event=alloc,file=f,flamegraph,interval=1000000,alloc=2", command);
+        assertEquals("start,event=alloc,alloc=2,file=f,flamegraph,interval=1000000", command);
     }
 
     @Test

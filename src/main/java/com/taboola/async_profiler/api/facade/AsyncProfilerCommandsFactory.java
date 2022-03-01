@@ -1,5 +1,8 @@
 package com.taboola.async_profiler.api.facade;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.taboola.async_profiler.api.original.Events;
 
 /**
@@ -12,15 +15,13 @@ public class AsyncProfilerCommandsFactory {
 
         StringBuilder stringBuilder = new StringBuilder("start");
 
-        stringBuilder.append(",event=");
-        stringBuilder.append(String.join(",", profileRequest.getEvents()));
-
-        appendFileAndFormat(profileRequest, filePath, stringBuilder);
-
-        if (profileRequest.getSamplingInterval() != null && profileRequest.getSamplingIntervalTimeUnit() != null) {
-            int interval = Math.toIntExact(profileRequest.getSamplingIntervalTimeUnit().toNanos(profileRequest.getSamplingInterval())); //interval should be in nanos
-            stringBuilder.append(",interval=");
-            stringBuilder.append(interval);
+        Set<String> eventsWithoutLockAndAlloc = new HashSet<>(profileRequest.getEvents());
+        eventsWithoutLockAndAlloc.remove(Events.ALLOC);
+        eventsWithoutLockAndAlloc.remove(Events.LOCK);
+        if (eventsWithoutLockAndAlloc.isEmpty()) {
+            stringBuilder.append(",event=" + profileRequest.getEvents().stream().findAny().get());
+        } else {
+            stringBuilder.append(",event=" + eventsWithoutLockAndAlloc.stream().findAny().get());
         }
 
         if (profileRequest.getEvents().contains(Events.ALLOC) && profileRequest.getAllocIntervalBytes() != null) {
@@ -31,6 +32,14 @@ public class AsyncProfilerCommandsFactory {
         if (profileRequest.getEvents().contains(Events.LOCK) && profileRequest.getLockThresholdNanos() != null) {
             stringBuilder.append(",lock=");
             stringBuilder.append(profileRequest.getLockThresholdNanos());
+        }
+
+        appendFileAndFormat(profileRequest, filePath, stringBuilder);
+
+        if (profileRequest.getSamplingInterval() != null && profileRequest.getSamplingIntervalTimeUnit() != null) {
+            int interval = Math.toIntExact(profileRequest.getSamplingIntervalTimeUnit().toNanos(profileRequest.getSamplingInterval())); //interval should be in nanos
+            stringBuilder.append(",interval=");
+            stringBuilder.append(interval);
         }
 
         if (profileRequest.getJfrSync() != null) {
@@ -48,7 +57,6 @@ public class AsyncProfilerCommandsFactory {
 
         if (profileRequest.isSeparateThreads()) {
             stringBuilder.append(",threads"); //profile different threads separately
-
         }
 
         return stringBuilder.toString();

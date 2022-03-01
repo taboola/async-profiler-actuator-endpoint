@@ -5,7 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -58,5 +61,22 @@ public class IOUtils {
         }
 
         return (int) count;
+    }
+
+    public String readToString(InputStream inputStream) {
+        int bufferSize = 1024;
+        char[] buffer = new char[bufferSize];
+        StringBuilder result = new StringBuilder();
+        Reader in = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+
+        try {
+            for (int numRead; (numRead = in.read(buffer, 0, buffer.length)) > 0; ) {
+                result.append(buffer, 0, numRead);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result.toString();
     }
 }

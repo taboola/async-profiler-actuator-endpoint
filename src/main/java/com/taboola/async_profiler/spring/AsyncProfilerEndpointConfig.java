@@ -71,9 +71,9 @@ public class AsyncProfilerEndpointConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProfileResultsReporter profileSnapshotsReporter(AsyncProfilerServiceConfigurations asyncProfilerConfigurations, IOUtils ioUtils, NetUtils netUtils) {
+    public ProfileResultsReporter profileResultsReporter(AsyncProfilerServiceConfigurations asyncProfilerConfigurations, IOUtils ioUtils, NetUtils netUtils) {
         //using pyroscope reporter as the default reporter implementation
-        //will get called only if no other ProfileSnapshotsReporter bean was provided
+        //will get called only if no other ProfileResultsReporter bean was provided
         return new PyroscopeReporter(asyncProfilerConfigurations.getContinuousProfiling().getPyroscopeReporter(), ioUtils, netUtils);
     }
 

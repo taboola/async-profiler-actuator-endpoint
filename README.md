@@ -7,7 +7,7 @@ This project contains a spring boot actuator endpoint implementation which serve
 
 It allows controlling the profiler via simple HTTP GET requests to the profiled service itself. 
 
-You can either send a blocking profile request and get the flame graph in the response, or send a non-blocking request to start a continuous-profiling session which will periodically report profile snapshots to a dedicated reporter. 
+You can either send a blocking profile request and get the flame graph in the response, or send a non-blocking request to start a continuous-profiling session which will periodically report profile results to a dedicated reporter. 
 
 #### Async Profiler Library
 The profiler library is already bundled in this project. If you want to use your own custom version, you can just override it by configuring the path to yours, e.g: 
@@ -45,7 +45,7 @@ public class YourSpringConfigurationClass {
 
    `/async-profiler/profile?events=alloc,cpu,lock&durationSeconds=30`
 
-    Check [this class](https://github.com/taboola/async-profiler-actuator-endpoint/blob/main/src/main/java/com/taboola/async_profiler/api/facade/ProfileRequest.java) to see the possible request parameters.
+    Check [ProfileRequest](https://github.com/taboola/async-profiler-actuator-endpoint/blob/main/src/main/java/com/taboola/async_profiler/api/facade/ProfileRequest.java) to see the possible request parameters.
 
 
 2. `/async-profiler/stop` - to stop a currently active profile request, if any, and get its profiling output in the response.
@@ -53,7 +53,7 @@ public class YourSpringConfigurationClass {
 
 3. `/async-profiler/start-continuous` - to start a continuous profiling session. 
 
-    This will use the default parameters (cpu profiling in 10-seconds snapshots), you can override them with the same parameters that are available for profile requests [here](https://github.com/taboola/async-profiler-actuator-endpoint/blob/main/src/main/java/com/taboola/async_profiler/api/facade/ProfileRequest.java).
+    This will use the default parameters (cpu profiling in 10-seconds snapshots), you can override them with the same parameters that are available for profile requests.
 
 
 4. `/async-profiler/stop-continuous` - to stop a continuous profiling session.

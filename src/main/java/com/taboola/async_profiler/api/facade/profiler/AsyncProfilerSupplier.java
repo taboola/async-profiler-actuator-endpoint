@@ -3,19 +3,25 @@ package com.taboola.async_profiler.api.facade.profiler;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.taboola.async_profiler.api.original.AsyncProfilerImpl;
 import com.taboola.async_profiler.utils.IOUtils;
 
 public class AsyncProfilerSupplier {
+
+    private static Logger logger = LoggerFactory.getLogger(AsyncProfilerSupplier.class);
 
     private AsyncProfiler asyncProfiler;
 
     public AsyncProfilerSupplier(IOUtils ioUtils, String configuredLibPath) {
         try {
             String libPath = (configuredLibPath != null) ? configuredLibPath : unpackBundledLib(ioUtils);
+            logger.info("Loading AsyncProfiler from {}", libPath);
             asyncProfiler = AsyncProfilerImpl.getInstance(libPath);
 
         } catch (Throwable t) {
+            logger.error("Failed loading async profiler lib", t);
             //Couldn't load the profiler library, use the empty implementation
             asyncProfiler = new EmptyAsyncProfiler(t);
         }
@@ -38,6 +44,7 @@ public class AsyncProfilerSupplier {
         try (final InputStream inputStream = AsyncProfilerSupplier.class.getResourceAsStream("/async-profiler-libs/" + osEnvName + "/libasyncProfiler.so")) {
             String pathToLib = ioUtils.createTempFile("libasyncProfiler", ".so");
             ioUtils.copy(inputStream, pathToLib);
+            logger.info("Extracted bundled AsyncProfiler for {} to {}", osEnvName, pathToLib);
 
             return pathToLib;
         }

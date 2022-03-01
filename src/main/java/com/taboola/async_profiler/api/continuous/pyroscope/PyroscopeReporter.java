@@ -48,41 +48,41 @@ public class PyroscopeReporter implements ProfileResultsReporter {
         }
     }
 
-    private void validate(ProfileResult snapshot) {
-        if (snapshot.getRequest().getEvents().size() > 1) {
-            throw new IllegalArgumentException("Multiple events snapshot is not supported");
+    private void validate(ProfileResult profileResult) {
+        if (profileResult.getRequest().getEvents().size() > 1) {
+            throw new IllegalArgumentException("Multiple events profileResult is not supported");
         }
 
-        if (!Format.COLLAPSED.equals(snapshot.getRequest().getFormat())) {
+        if (!Format.COLLAPSED.equals(profileResult.getRequest().getFormat())) {
             throw new IllegalArgumentException("Only collapsed format is supported");
         }
     }
 
-    private HttpURLConnection createPyroscopeIngestRequest(ProfileResult profileSnapshot) throws IOException {
+    private HttpURLConnection createPyroscopeIngestRequest(ProfileResult profileResult) throws IOException {
         HttpURLConnection httpURLConnection = netUtils.getHTTPConnection(config.getPyroscopeServerAddress(),
                 config.getPyroscopeServerIngestPath(),
-                asQueryParamsMap(config, profileSnapshot),
+                asQueryParamsMap(config, profileResult),
                 "POST",
                 config.getConnectTimeoutMillis(),
                 config.getReadTimeoutMillis());
 
-        ioUtils.copy(profileSnapshot.getResultInputStream(), httpURLConnection.getOutputStream());
+        ioUtils.copy(profileResult.getResultInputStream(), httpURLConnection.getOutputStream());
 
         return httpURLConnection;
     }
 
-    private Map<String, String> asQueryParamsMap(PyroscopeReporterConfig config, ProfileResult snapshot) {
+    private Map<String, String> asQueryParamsMap(PyroscopeReporterConfig config, ProfileResult profileResult) {
         Map<String, String> queryParams = new HashMap<>();
-        String event = snapshot.getRequest().getEvents().stream().findFirst().get();
+        String event = profileResult.getRequest().getEvents().stream().findFirst().get();
 
         queryParams.put("name", config.getAppName() + "." + event);
         queryParams.put("spyName", config.getSpyName());
         queryParams.put("aggregationType", "sum");
 
         queryParams.put("units", Events.ALLOC.equals(event) ? "objects" : "samples");
-        queryParams.put("sampleRate", getIntervalInHz(snapshot.getRequest()));
-        queryParams.put("from", asEpochSecondsString(snapshot.getStartTime()));
-        queryParams.put("until", asEpochSecondsString(snapshot.getEndTime()));
+        queryParams.put("sampleRate", getIntervalInHz(profileResult.getRequest()));
+        queryParams.put("from", asEpochSecondsString(profileResult.getStartTime()));
+        queryParams.put("until", asEpochSecondsString(profileResult.getEndTime()));
 
         return queryParams;
     }

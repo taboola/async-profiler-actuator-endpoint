@@ -5,6 +5,8 @@ import lombok.SneakyThrows;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.taboola.async_profiler.api.continuous.ContinuousProfilingSnapshotRequest;
 import com.taboola.async_profiler.api.continuous.ProfileResultsReporter;
 import com.taboola.async_profiler.api.facade.AsyncProfilerFacade;
@@ -15,6 +17,8 @@ import com.taboola.async_profiler.utils.RecurringRunnable;
 import com.taboola.async_profiler.utils.ThreadUtils;
 
 public class AsyncProfilerService {
+
+    private static Logger logger = LoggerFactory.getLogger(AsyncProfilerService.class);
 
     private final AsyncProfilerFacade asyncProfilerFacade;
     private final ProfileResultsReporter profileResultsReporter;
@@ -91,6 +95,7 @@ public class AsyncProfilerService {
             reportAsync(profileSnapshotResult);
 
         } catch (RuntimeException ex) {
+            logger.error("Failed submitting profile result, sleeping for {} seconds", ex, continuousProfilingFailureBackoffSeconds);
             //sleep for backoff seconds if the profiler has failed or if we failed to submit the result to the reporter executor service
             //we will throw from here only if we failed to sleep because it was interrupted, which is ok
             threadUtils.sleep(continuousProfilingFailureBackoffSeconds, TimeUnit.SECONDS);
@@ -105,6 +110,7 @@ public class AsyncProfilerService {
                 try {
                     profileSnapshotResult.close();
                 } catch (Exception e) {
+                    logger.error("Failed closing profile result", e);
                 }
             }
 
@@ -115,8 +121,8 @@ public class AsyncProfilerService {
     private void reportSnapshot(ProfileResult snapshotResult) {
         try (ProfileResult profileResult = snapshotResult) {
             profileResultsReporter.report(profileResult);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (Exception ex) {
+            logger.error("Unexpected error in profile results reporter", ex);
         }
     }
 

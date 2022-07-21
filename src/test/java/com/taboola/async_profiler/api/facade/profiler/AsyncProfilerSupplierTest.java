@@ -17,7 +17,10 @@ public class AsyncProfilerSupplierTest {
         AsyncProfiler asyncProfiler = asyncProfilerSupplier.getProfiler();
 
         assertNotNull(asyncProfiler);
-        assertTrue(asyncProfiler instanceof EmptyAsyncProfiler);
+        assertTrue(asyncProfiler instanceof LazyLoadedAsyncProfiler);
+
+        LazyLoadedAsyncProfiler lazyLoadedAsyncProfiler = (LazyLoadedAsyncProfiler) asyncProfiler;
+        assertTrue(lazyLoadedAsyncProfiler.getOrLoadAsyncProfiler() instanceof EmptyAsyncProfiler);
     }
 
     @Test
@@ -33,10 +36,12 @@ public class AsyncProfilerSupplierTest {
         AsyncProfiler asyncProfiler = asyncProfilerSupplier.getProfiler();
 
         assertNotNull(asyncProfiler);
+        assertTrue(asyncProfiler instanceof LazyLoadedAsyncProfiler);
+        LazyLoadedAsyncProfiler lazyLoadedAsyncProfiler = (LazyLoadedAsyncProfiler) asyncProfiler;
         if (osEnv != null) {
-            assertFalse(asyncProfiler instanceof EmptyAsyncProfiler);
+            assertFalse(lazyLoadedAsyncProfiler.getOrLoadAsyncProfiler() instanceof EmptyAsyncProfiler);
         } else {
-            assertTrue(asyncProfiler instanceof EmptyAsyncProfiler);
+            assertTrue(lazyLoadedAsyncProfiler.getOrLoadAsyncProfiler() instanceof EmptyAsyncProfiler);
         }
     }
 }

@@ -21,6 +21,7 @@ public class ProfileRequest {
     Integer samplingInterval = 1;
     TimeUnit samplingIntervalTimeUnit = TimeUnit.MILLISECONDS;
     Integer allocIntervalBytes = 10_000;//relevant only for alloc event.
+    boolean liveObjectsOnly = true;
     Integer lockThresholdNanos = 1;//relevant only for lock event.
     boolean separateThreads = false;
     String includedThreads;

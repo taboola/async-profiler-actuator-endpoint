@@ -42,6 +42,10 @@ public class AsyncProfilerCommandsFactory {
             stringBuilder.append(interval);
         }
 
+        if (profileRequest.getEvents().contains(Events.ALLOC) && profileRequest.isLiveObjectsOnly()) {
+            stringBuilder.append(",live");
+        }
+
         if (profileRequest.getJfrSync() != null) {
             if (profileRequest.getJfrSync().isEmpty()) {
                 stringBuilder.append(",jfrsync");

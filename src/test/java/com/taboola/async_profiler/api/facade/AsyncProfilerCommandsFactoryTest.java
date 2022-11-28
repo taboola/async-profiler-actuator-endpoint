@@ -71,7 +71,7 @@ public class AsyncProfilerCommandsFactoryTest {
         profileRequest.setSamplingIntervalTimeUnit(TimeUnit.NANOSECONDS);
         String command = commandFactory.createStartCommand(profileRequest, file);
 
-        assertEquals("start,event=cpu,alloc=10000,lock=1,file=f,jfr,interval=1", command);
+        assertEquals("start,event=cpu,alloc=10000,lock=1,file=f,jfr,interval=1,live", command);
     }
 
     @Test
@@ -92,6 +92,19 @@ public class AsyncProfilerCommandsFactoryTest {
         profileRequest.setEvents(new HashSet<String>(){{add(Events.ALLOC);}});
         profileRequest.setSamplingInterval(1);
         profileRequest.setAllocIntervalBytes(2);
+        String command = commandFactory.createStartCommand(profileRequest, file);
+
+        assertEquals("start,event=alloc,alloc=2,file=f,flamegraph,interval=1000000,live", command);
+    }
+
+    @Test
+    public void testCreateStartCommand_whenEventIsAllocAndLiveObjectsOnlyIsFalse() {
+        String file = "f";
+        ProfileRequest profileRequest = new ProfileRequest();
+        profileRequest.setEvents(new HashSet<String>(){{add(Events.ALLOC);}});
+        profileRequest.setSamplingInterval(1);
+        profileRequest.setAllocIntervalBytes(2);
+        profileRequest.setLiveObjectsOnly(false);
         String command = commandFactory.createStartCommand(profileRequest, file);
 
         assertEquals("start,event=alloc,alloc=2,file=f,flamegraph,interval=1000000", command);

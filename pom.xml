@@ -6,7 +6,7 @@
 
     <groupId>com.taboola</groupId>
     <artifactId>async-profiler-actuator-endpoint</artifactId>
-    <version>2.0.1_${async.profiler.version}</version>
+    <version>2.0.2_${async.profiler.version}</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Async Profiler Actuator Endpoint</description>
@@ -51,7 +51,7 @@
         <com.taboola.spring.version>4.3.23.RELEASE</com.taboola.spring.version>
         <com.taboola.spring.boot.version>1.5.20.RELEASE</com.taboola.spring.boot.version>
         <com.taboola.lombok.version>1.18.10</com.taboola.lombok.version>
-        <async.profiler.version>2.7</async.profiler.version>
+        <async.profiler.version>2.9</async.profiler.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <skip.bootstrap>false</skip.bootstrap>

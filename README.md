@@ -27,6 +27,7 @@ Add the dependency:
 <dependency>
   <groupId>com.taboola</groupId>
   <artifactId>async-profiler-actuator-endpoint</artifactId>
+  <version>2.0.3_2.9</version>
 </dependency>
 ```
 

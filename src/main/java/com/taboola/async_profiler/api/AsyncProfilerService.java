@@ -95,7 +95,7 @@ public class AsyncProfilerService {
             reportAsync(profileSnapshotResult);
 
         } catch (RuntimeException ex) {
-            logger.error("Failed submitting profile result, sleeping for {} seconds", ex, continuousProfilingFailureBackoffSeconds);
+            logger.error("Failed submitting profile result {}, sleeping for {} seconds", ex, continuousProfilingFailureBackoffSeconds);
             //sleep for backoff seconds if the profiler has failed or if we failed to submit the result to the reporter executor service
             //we will throw from here only if we failed to sleep because it was interrupted, which is ok
             threadUtils.sleep(continuousProfilingFailureBackoffSeconds, TimeUnit.SECONDS);

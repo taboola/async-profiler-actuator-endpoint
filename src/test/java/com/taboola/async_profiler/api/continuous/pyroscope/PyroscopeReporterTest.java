@@ -2,28 +2,17 @@ package com.taboola.async_profiler.api.continuous.pyroscope;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.Deflater;
 
 import io.pyroscope.labels.Pyroscope;
 import io.pyroscope.okhttp3.Call;
@@ -151,6 +140,19 @@ public class PyroscopeReporterTest {
         when(httpClient.newCall(any())).thenReturn(call);
         pyroscopeReporter.report(profileResult);
         verify(call, times(1)).execute();
+    }
+
+    @Test
+    public void testReport_whenAllocEventsOnCollapsed_shouldThrow() throws IOException {
+        Set<String> events = new HashSet<>();
+        events.add("alloc");
+        ProfileResult profileResult = ProfileResult.builder()
+                .request(ProfileRequest.builder().events(events).samplingInterval(1).samplingIntervalTimeUnit(TimeUnit.MILLISECONDS).format(Format.COLLAPSED).build())
+                .resultInputStream(mock(InputStream.class))
+                .startTime(LocalDateTime.now())
+                .endTime(LocalDateTime.now().plusMinutes(1))
+                .build();
+        assertThrows(IllegalArgumentException.class, () -> pyroscopeReporter.report(profileResult));
     }
 
     @Test

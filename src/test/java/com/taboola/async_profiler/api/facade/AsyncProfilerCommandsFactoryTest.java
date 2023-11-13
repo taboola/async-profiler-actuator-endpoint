@@ -36,12 +36,12 @@ public class AsyncProfilerCommandsFactoryTest {
     public void testCreateStartCommandWithFormat() {
         String file = "f";
         ProfileRequest profileRequest = new ProfileRequest();
-        profileRequest.setFormat(Format.COLLAPSED);
+        profileRequest.setFormat(Format.JFR);
         profileRequest.setSamplingInterval(1);
         profileRequest.setSamplingIntervalTimeUnit(TimeUnit.NANOSECONDS);
         String command = commandFactory.createStartCommand(profileRequest, file);
 
-        assertEquals("start,event=cpu,file=f,collapsed,interval=1", command);
+        assertEquals("start,event=cpu,file=f,jfr,interval=1", command);
     }
 
     @Test

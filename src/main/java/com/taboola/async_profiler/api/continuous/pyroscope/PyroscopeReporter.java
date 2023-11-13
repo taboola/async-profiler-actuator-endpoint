@@ -59,11 +59,14 @@ public class PyroscopeReporter implements ProfileResultsReporter {
     }
 
     private void validate(ProfileResult profileResult) {
-        if (Format.COLLAPSED.equals(profileResult.getRequest().getFormat())
-                && profileResult.getRequest().getEvents().contains(Events.ALLOC)) {
+        ProfileRequest request = profileResult.getRequest();
+        Format format = request.getFormat();
+
+        if (Format.COLLAPSED.equals(format) && request.getEvents().contains(Events.ALLOC)) {
             // https://github.com/grafana/pyroscope/pull/2362
             throw new IllegalArgumentException("Collapsed format does not support Alloc event");
         }
+
     }
 
     private String getName(final ProfileResult profileResult, final PyroscopeReporterConfig config) {

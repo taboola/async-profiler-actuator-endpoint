@@ -15,14 +15,7 @@ public class AsyncProfilerCommandsFactory {
 
         StringBuilder stringBuilder = new StringBuilder("start");
 
-        Set<String> eventsWithoutLockAndAlloc = new HashSet<>(profileRequest.getEvents());
-        eventsWithoutLockAndAlloc.remove(Events.ALLOC);
-        eventsWithoutLockAndAlloc.remove(Events.LOCK);
-        if (eventsWithoutLockAndAlloc.isEmpty()) {
-            stringBuilder.append(",event=" + profileRequest.getEvents().stream().findAny().get());
-        } else {
-            stringBuilder.append(",event=" + eventsWithoutLockAndAlloc.stream().findAny().get());
-        }
+        stringBuilder.append(",event=" + String.join(",", profileRequest.getEvents()));
 
         if (profileRequest.getEvents().contains(Events.ALLOC) && profileRequest.getAllocIntervalBytes() != null) {
             stringBuilder.append(",alloc=");

@@ -8,10 +8,12 @@ import com.taboola.async_profiler.api.original.Events;
 import com.taboola.async_profiler.api.original.Format;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProfileRequest {
@@ -28,6 +30,7 @@ public class ProfileRequest {
     String includedTraces;
     String excludedTraces;
     String jfrSync;
+    boolean includeLabels = false;
 
     public Format getFormat() {
         if (events != null && events.size() > 1) {

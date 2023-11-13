@@ -1,5 +1,7 @@
 package com.taboola.async_profiler.spring;
 
+import com.taboola.async_profiler.api.continuous.pyroscope.PyroscopeReporterConfig;
+import io.pyroscope.okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -17,8 +19,9 @@ import com.taboola.async_profiler.api.facade.AsyncProfilerFacade;
 import com.taboola.async_profiler.api.facade.profiler.AsyncProfilerSupplier;
 import com.taboola.async_profiler.api.serviceconfig.ExecutorServiceConfig;
 import com.taboola.async_profiler.utils.IOUtils;
-import com.taboola.async_profiler.utils.NetUtils;
 import com.taboola.async_profiler.utils.ThreadUtils;
+
+import java.time.Duration;
 
 @Configuration
 @Lazy
@@ -37,13 +40,18 @@ public class AsyncProfilerEndpointConfig {
     }
 
     @Bean
-    public NetUtils netUtils() {
-        return new NetUtils();
+    public IOUtils ioUtils() {
+        return new IOUtils();
     }
 
     @Bean
-    public IOUtils ioUtils() {
-        return new IOUtils();
+    public OkHttpClient okHttpClient(AsyncProfilerServiceConfigurations config) {
+        PyroscopeReporterConfig reporterConfig = config.getContinuousProfiling().getPyroscopeReporter();
+        return new OkHttpClient.Builder()
+                .connectTimeout(Duration.ofMillis(reporterConfig.getConnectTimeoutMillis()))
+                .readTimeout(Duration.ofMillis(reporterConfig.getReadTimeoutMillis()))
+                .callTimeout(Duration.ofMillis(reporterConfig.getCallTimeoutMillis()))
+                .build();
     }
 
     @Bean
@@ -71,10 +79,10 @@ public class AsyncProfilerEndpointConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public ProfileResultsReporter profileResultsReporter(AsyncProfilerServiceConfigurations asyncProfilerConfigurations, IOUtils ioUtils, NetUtils netUtils) {
+    public ProfileResultsReporter profileResultsReporter(AsyncProfilerServiceConfigurations asyncProfilerConfigurations, IOUtils ioUtils, OkHttpClient httpClient) {
         //using pyroscope reporter as the default reporter implementation
         //will get called only if no other ProfileResultsReporter bean was provided
-        return new PyroscopeReporter(asyncProfilerConfigurations.getContinuousProfiling().getPyroscopeReporter(), ioUtils, netUtils);
+        return new PyroscopeReporter(asyncProfilerConfigurations.getContinuousProfiling().getPyroscopeReporter(), ioUtils, httpClient);
     }
 
     @Bean

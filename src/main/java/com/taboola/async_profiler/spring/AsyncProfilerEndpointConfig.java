@@ -61,7 +61,7 @@ public class AsyncProfilerEndpointConfig {
 
     @Bean
     public AsyncProfilerSupplier asyncProfilerSupplier(IOUtils ioUtils, AsyncProfilerServiceConfigurations asyncProfilerConfig) {
-        return new AsyncProfilerSupplier(ioUtils, asyncProfilerConfig.getLibPath());
+        return new AsyncProfilerSupplier();
     }
 
     @Bean

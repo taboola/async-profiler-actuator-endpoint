@@ -16,7 +16,7 @@
 package com.taboola.async_profiler.api.original;
 
 /**
- * Predefined event names to use in {@link AsyncProfilerImpl#start(String, long)}
+ * Predefined event names to use in {@link io.pyroscope.one.profiler.AsyncProfiler#start(String, long)}
  */
 public class Events {
     public static final String CPU    = "cpu";

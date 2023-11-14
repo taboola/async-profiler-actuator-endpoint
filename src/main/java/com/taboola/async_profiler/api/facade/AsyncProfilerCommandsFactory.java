@@ -1,8 +1,5 @@
 package com.taboola.async_profiler.api.facade;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.taboola.async_profiler.api.original.Events;
 
 /**
@@ -15,7 +12,7 @@ public class AsyncProfilerCommandsFactory {
 
         StringBuilder stringBuilder = new StringBuilder("start");
 
-        stringBuilder.append(",event=" + String.join(",", profileRequest.getEvents()));
+        stringBuilder.append(",event=").append(String.join(",", profileRequest.getEvents()));
 
         if (profileRequest.getEvents().contains(Events.ALLOC) && profileRequest.getAllocIntervalBytes() != null) {
             stringBuilder.append(",alloc=");

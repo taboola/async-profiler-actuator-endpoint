@@ -1,5 +1,6 @@
 *.class
 .idea/
+.DS_Store
 *.iml
 bin/
 target/

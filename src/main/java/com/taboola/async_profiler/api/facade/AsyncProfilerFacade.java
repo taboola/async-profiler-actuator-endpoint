@@ -12,6 +12,7 @@ import com.taboola.async_profiler.api.facade.profiler.AsyncProfiler;
 import com.taboola.async_profiler.api.original.Format;
 import com.taboola.async_profiler.utils.IOUtils;
 import com.taboola.async_profiler.utils.ThreadUtils;
+import io.pyroscope.labels.Pyroscope;
 
 /**
  * A friendlier API over the original AsyncProfiler.
@@ -65,7 +66,6 @@ public class AsyncProfilerFacade {
             if (profileContext != null) {
                 ioUtils.safeDeleteIfExists(profileContext.getTmpFilePath());
             }
-
             throw new RuntimeException("Unexpected failure occurred: " + e.getMessage(), e);
         }
     }
@@ -133,10 +133,15 @@ public class AsyncProfilerFacade {
         asyncProfiler.execute(stopCommand);
 
         InputStream resultInputStream = ioUtils.getDisposableFileInputStream(profileContext.getTmpFilePath());
-        return new ProfileResult(profileContext.getProfileRequest(),
-                resultInputStream,
-                profileContext.getStartTime(),
-                endTime);
+        ProfileResult.ProfileResultBuilder builder = ProfileResult.builder()
+                .request(profileContext.getProfileRequest())
+                .resultInputStream(resultInputStream)
+                .startTime(profileContext.getStartTime())
+                .endTime(endTime);
+        if (profileContext.getProfileRequest().isIncludeLabels()) {
+            builder.labels(Pyroscope.LabelsWrapper.dump());
+        }
+        return builder.build();
     }
 
     private String buildTitleIfNeeded(ProfileRequest profileRequest, LocalDateTime startTime, LocalDateTime endTime) {

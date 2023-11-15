@@ -6,7 +6,7 @@ import com.taboola.async_profiler.api.original.Format;
 public class ContinuousProfilingSnapshotRequest extends ProfileRequest {
 
     public ContinuousProfilingSnapshotRequest() {
-        setFormat(Format.COLLAPSED);
+        setFormat(Format.JFR);
         setDurationSeconds(10);
     }
 }

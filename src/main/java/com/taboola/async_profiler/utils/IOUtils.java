@@ -1,5 +1,6 @@
 package com.taboola.async_profiler.utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

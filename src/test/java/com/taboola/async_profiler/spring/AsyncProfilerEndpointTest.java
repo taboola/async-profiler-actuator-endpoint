@@ -46,7 +46,7 @@ public class AsyncProfilerEndpointTest {
     public void testProfile() throws IOException {
         ProfileRequest profileRequest = mock(ProfileRequest.class);
         InputStream inputStream = mock(InputStream.class);
-        ProfileResult profileResult = new ProfileResult(profileRequest, inputStream, LocalDateTime.now(), LocalDateTime.now());
+        ProfileResult profileResult = ProfileResult.builder().request(profileRequest).resultInputStream(inputStream).startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).build();
         when(profileRequest.getFormat()).thenReturn(Format.FLAMEGRAPH);
         when(asyncProfilerService.profile(same(profileRequest))).thenReturn(profileResult);
 
@@ -61,7 +61,7 @@ public class AsyncProfilerEndpointTest {
     public void testProfileWithBinaryFormatResult() throws IOException {
         ProfileRequest profileRequest = mock(ProfileRequest.class);
         InputStream inputStream = mock(InputStream.class);
-        ProfileResult profileResult = new ProfileResult(profileRequest, inputStream, LocalDateTime.now(), LocalDateTime.now());
+        ProfileResult profileResult = ProfileResult.builder().request(profileRequest).resultInputStream(inputStream).startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).build();
         when(profileRequest.getFormat()).thenReturn(Format.JFR);
         when(asyncProfilerService.profile(same(profileRequest))).thenReturn(profileResult);
 
@@ -77,7 +77,7 @@ public class AsyncProfilerEndpointTest {
     public void testStop() throws IOException {
         ProfileRequest profileRequest = mock(ProfileRequest.class);
         InputStream inputStream = mock(InputStream.class);
-        ProfileResult profileResult = new ProfileResult(profileRequest, inputStream, LocalDateTime.now(), LocalDateTime.now());
+        ProfileResult profileResult = ProfileResult.builder().request(profileRequest).resultInputStream(inputStream).startTime(LocalDateTime.now()).endTime(LocalDateTime.now()).build();
         when(profileRequest.getFormat()).thenReturn(Format.FLAMEGRAPH);
         when(asyncProfilerService.stop()).thenReturn(profileResult);
 

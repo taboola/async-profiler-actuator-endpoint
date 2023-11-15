@@ -58,7 +58,7 @@ public class AsyncProfilerServiceTest {
     @Test
     public void testProfile() {
         ProfileRequest profileRequest = new ProfileRequest();
-        ProfileResult profileResult = new ProfileResult(profileRequest, null, null, null);
+        ProfileResult profileResult = ProfileResult.builder().request(profileRequest).build();
 
         when(asyncProfilerFacade.profile(eq(profileRequest))).thenReturn(profileResult);
 
@@ -72,7 +72,7 @@ public class AsyncProfilerServiceTest {
     @Test
     public void testStop() {
         ProfileRequest profileRequest = new ProfileRequest();
-        ProfileResult profileResult = new ProfileResult(profileRequest, null, null, null);
+        ProfileResult profileResult = ProfileResult.builder().request(profileRequest).build();
 
         when(asyncProfilerFacade.stop()).thenReturn(profileResult);
 
@@ -86,7 +86,7 @@ public class AsyncProfilerServiceTest {
     @Test
     public void testStartAndStopContinuousProfiling() throws Exception {
         ContinuousProfilingSnapshotRequest profileRequest = new ContinuousProfilingSnapshotRequest();
-        ProfileResult profileResult = new ProfileResult(profileRequest, mock(InputStream.class), null, null);
+        ProfileResult profileResult = ProfileResult.builder().request(profileRequest).resultInputStream(mock(InputStream.class)).build();
 
         when(asyncProfilerFacade.profile(eq(profileRequest))).thenReturn(profileResult);
 
@@ -120,7 +120,7 @@ public class AsyncProfilerServiceTest {
     @Test
     public void testStartContinuousProfilingOnInit() throws Exception {
         ProfileRequest profileRequest = new ContinuousProfilingSnapshotRequest();
-        ProfileResult profileResult = new ProfileResult(profileRequest, mock(InputStream.class), null, null);
+        ProfileResult profileResult =  ProfileResult.builder().request(profileRequest).resultInputStream(mock(InputStream.class)).build();
         when(asyncProfilerFacade.profile(eq(profileRequest))).thenReturn(profileResult);
         config.getContinuousProfiling().setStartOnInit(true);
 
@@ -150,7 +150,7 @@ public class AsyncProfilerServiceTest {
     @Test
     public void testStartContinuousProfiling_whenAlreadyStarted_shouldThrow() throws Exception {
         ContinuousProfilingSnapshotRequest profileRequest = new ContinuousProfilingSnapshotRequest();
-        ProfileResult profileResult = new ProfileResult(profileRequest, mock(InputStream.class), null, null);
+        ProfileResult profileResult = ProfileResult.builder().request(profileRequest).resultInputStream(mock(InputStream.class)).build();
 
         when(asyncProfilerFacade.profile(eq(profileRequest))).thenReturn(profileResult);
 

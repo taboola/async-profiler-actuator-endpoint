@@ -10,8 +10,7 @@ It allows controlling the profiler via simple HTTP GET requests to the profiled 
 You can either send a blocking profile request and get the flame graph in the response, or send a non-blocking request to start a continuous-profiling session which will periodically report profile results to a dedicated reporter. 
 
 #### Async Profiler Library
-The profiler library is already bundled in this project. If you want to use your own custom version, you can just override it by configuring the path to yours, e.g: 
-```com.taboola.asyncProfiler.libPath=/opt/async-profiler/build/libasyncProfiler.so```
+The profiler library is already bundled in this project.
 
 #### Continuous Profiling
 As mentioned above, we also support continuous profiling to periodically run the profiler and report the results to a dedicated reporter.

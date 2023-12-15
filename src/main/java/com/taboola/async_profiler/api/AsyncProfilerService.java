@@ -27,7 +27,7 @@ public class AsyncProfilerService {
     private final long continuousProfilingFailureBackoffSeconds;
     private final ThreadUtils threadUtils;
     private final Object lock;
-    private RecurringRunnable currentContinuousProfilingTask;
+    private volatile RecurringRunnable currentContinuousProfilingTask;
 
     public AsyncProfilerService(AsyncProfilerFacade asyncProfilerFacade,
                                 ProfileResultsReporter profileResultsReporter,
@@ -78,6 +78,10 @@ public class AsyncProfilerService {
                 throw new IllegalStateException("There is no active continuous profiling session");
             }
         }
+    }
+
+    public boolean isContinuousProfilingActive() {
+        return currentContinuousProfilingTask != null;
     }
 
     public String getSupportedEvents() {

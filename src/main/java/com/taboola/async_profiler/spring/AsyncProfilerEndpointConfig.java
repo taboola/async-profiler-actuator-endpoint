@@ -1,5 +1,6 @@
 package com.taboola.async_profiler.spring;
 
+import com.taboola.async_profiler.api.LabelsWrapper;
 import com.taboola.async_profiler.api.continuous.pyroscope.PyroscopeReporterConfig;
 import io.pyroscope.okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -100,6 +101,7 @@ public class AsyncProfilerEndpointConfig {
                 asyncProfilerConfig,
                 threadUtils);
 
+        LabelsWrapper.setAsyncProfilerService(asyncProfilerService);
         return asyncProfilerService;
     }
 

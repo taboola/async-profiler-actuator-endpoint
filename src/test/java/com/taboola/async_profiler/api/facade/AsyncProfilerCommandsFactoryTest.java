@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.taboola.async_profiler.api.original.CStack;
 import com.taboola.async_profiler.api.original.Events;
 import com.taboola.async_profiler.api.original.Format;
 
@@ -132,6 +133,19 @@ public class AsyncProfilerCommandsFactoryTest {
         profileRequest.setSamplingInterval(-1);
         ProfileRequest finalProfileRequest3 = profileRequest;
         assertThrows("Sampling interval must be greater than 0", IllegalArgumentException.class, () -> commandFactory.createStartCommand(finalProfileRequest3, "a"));
+    }
+
+    @Test
+    public void testCreateStartCommandWith_CStack() {
+        String file = "f.ext";
+        ProfileRequest profileRequest = new ProfileRequest();
+        String baseCommand = commandFactory.createStartCommand(profileRequest, file);
+
+        for (CStack cStack : CStack.values()) {
+            profileRequest.setCStack(cStack);
+            String command = commandFactory.createStartCommand(profileRequest, file);
+            assertEquals(baseCommand + ",cstack=" + cStack.getMode(), command);
+        }
     }
 
     @Test

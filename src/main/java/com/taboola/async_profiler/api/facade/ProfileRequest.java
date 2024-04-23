@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.taboola.async_profiler.api.original.CStack;
 import com.taboola.async_profiler.api.original.Events;
 import com.taboola.async_profiler.api.original.Format;
 
@@ -31,6 +32,7 @@ public class ProfileRequest {
     String excludedTraces;
     String jfrSync;
     boolean includeLabels = false;
+    CStack cStack;
 
     public Format getFormat() {
         if (events != null && events.size() > 1) {

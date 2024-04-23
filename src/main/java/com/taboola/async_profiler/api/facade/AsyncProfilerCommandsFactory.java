@@ -53,6 +53,11 @@ public class AsyncProfilerCommandsFactory {
             stringBuilder.append(",threads"); //profile different threads separately
         }
 
+        if (profileRequest.getCStack() != null) {
+            stringBuilder.append(",cstack=");
+            stringBuilder.append(profileRequest.getCStack().getMode());
+        }
+
         return stringBuilder.toString();
     }
 

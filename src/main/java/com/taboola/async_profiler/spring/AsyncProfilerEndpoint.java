@@ -1,7 +1,8 @@
 package com.taboola.async_profiler.spring;
 
-import org.springframework.boot.actuate.endpoint.Endpoint;
-import org.springframework.boot.actuate.endpoint.mvc.MvcEndpoint;
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
+import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,33 +15,18 @@ import com.taboola.async_profiler.api.continuous.ContinuousProfilingSnapshotRequ
 import com.taboola.async_profiler.api.facade.ProfileRequest;
 import com.taboola.async_profiler.api.facade.ProfileResult;
 
-public class AsyncProfilerEndpoint implements MvcEndpoint {
+@Endpoint(id = "async-profiler")
+public class AsyncProfilerEndpoint {
 
     public static final String BINARY_PROFILE_ATTACHMENT_HEADER_VALUE = "attachment; filename=profile.";
 
     private final AsyncProfilerService asyncProfilerService;
-    private final boolean isSensitive;
 
-    public AsyncProfilerEndpoint(AsyncProfilerService asyncProfilerService, boolean isSensitive) {
+    public AsyncProfilerEndpoint(AsyncProfilerService asyncProfilerService) {
         this.asyncProfilerService = asyncProfilerService;
-        this.isSensitive = isSensitive;
     }
 
-    @Override
-    public String getPath() {
-        return "/async-profiler";
-    }
-
-    @Override
-    public boolean isSensitive() {
-        return isSensitive;
-    }
-
-    @Override
-    public Class<? extends Endpoint> getEndpointType() {
-        return null;
-    }
-
+    @WriteOperation
     @GetMapping(value = "/profile", produces = MediaType.ALL_VALUE)
     public ResponseEntity profile(ProfileRequest profileRequest) {
         ProfileResult profileResult = asyncProfilerService.profile(profileRequest);
@@ -48,6 +34,7 @@ public class AsyncProfilerEndpoint implements MvcEndpoint {
         return toResponseEntity(profileResult);
     }
 
+    @WriteOperation
     @GetMapping(value = "/stop", produces = MediaType.ALL_VALUE)
     public ResponseEntity stop() {
         ProfileResult profileResult = asyncProfilerService.stop();
@@ -55,6 +42,7 @@ public class AsyncProfilerEndpoint implements MvcEndpoint {
         return toResponseEntity(profileResult);
     }
 
+    @WriteOperation
     @GetMapping(value = "/start-continuous", produces = MediaType.ALL_VALUE)
     @ResponseBody
     public String startContinuous(ContinuousProfilingSnapshotRequest snapshotRequest) {
@@ -63,6 +51,7 @@ public class AsyncProfilerEndpoint implements MvcEndpoint {
         return "Started continuous profiling with: " + snapshotRequest;
     }
 
+    @WriteOperation
     @GetMapping(value = "/stop-continuous", produces = MediaType.ALL_VALUE)
     @ResponseBody
     public String stopContinuous() {
@@ -71,12 +60,14 @@ public class AsyncProfilerEndpoint implements MvcEndpoint {
         return "Stopped continuous profiling";
     }
 
+    @ReadOperation
     @GetMapping(value = "/events")
     @ResponseBody
     public String getSupportedEvents() {
         return asyncProfilerService.getSupportedEvents();
     }
 
+    @ReadOperation
     @GetMapping(value = "/version")
     @ResponseBody
     public String getVersion() {

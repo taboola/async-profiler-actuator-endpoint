@@ -48,7 +48,6 @@
 
     <properties>
         <slf4j.version>1.7.13</slf4j.version>
-        <com.taboola.spring.version>5.3.31</com.taboola.spring.version>
         <com.taboola.spring.boot.version>2.7.18</com.taboola.spring.boot.version>
         <com.taboola.lombok.version>1.18.10</com.taboola.lombok.version>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -65,16 +64,6 @@
             <groupId>io.pyroscope</groupId>
             <artifactId>agent</artifactId>
             <version>0.13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${com.taboola.spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>${com.taboola.spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

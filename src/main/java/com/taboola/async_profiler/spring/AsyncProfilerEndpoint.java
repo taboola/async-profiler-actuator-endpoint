@@ -1,7 +1,6 @@
 package com.taboola.async_profiler.spring;
 
-import org.springframework.boot.actuate.endpoint.Endpoint;
-import org.springframework.boot.actuate.endpoint.mvc.MvcEndpoint;
+import org.springframework.boot.actuate.endpoint.web.annotation.RestControllerEndpoint;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,31 +13,15 @@ import com.taboola.async_profiler.api.continuous.ContinuousProfilingSnapshotRequ
 import com.taboola.async_profiler.api.facade.ProfileRequest;
 import com.taboola.async_profiler.api.facade.ProfileResult;
 
-public class AsyncProfilerEndpoint implements MvcEndpoint {
+@RestControllerEndpoint(id = "async-profiler")
+public class AsyncProfilerEndpoint {
 
     public static final String BINARY_PROFILE_ATTACHMENT_HEADER_VALUE = "attachment; filename=profile.";
 
     private final AsyncProfilerService asyncProfilerService;
-    private final boolean isSensitive;
 
-    public AsyncProfilerEndpoint(AsyncProfilerService asyncProfilerService, boolean isSensitive) {
+    public AsyncProfilerEndpoint(AsyncProfilerService asyncProfilerService) {
         this.asyncProfilerService = asyncProfilerService;
-        this.isSensitive = isSensitive;
-    }
-
-    @Override
-    public String getPath() {
-        return "/async-profiler";
-    }
-
-    @Override
-    public boolean isSensitive() {
-        return isSensitive;
-    }
-
-    @Override
-    public Class<? extends Endpoint> getEndpointType() {
-        return null;
     }
 
     @GetMapping(value = "/profile", produces = MediaType.ALL_VALUE)

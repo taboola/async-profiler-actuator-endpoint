@@ -1,9 +1,7 @@
 package com.taboola.async_profiler.spring;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -39,7 +37,7 @@ public class AsyncProfilerEndpointTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        asyncProfilerEndPoint = new AsyncProfilerEndpoint(asyncProfilerService, false);
+        asyncProfilerEndPoint = new AsyncProfilerEndpoint(asyncProfilerService);
     }
 
     @Test
@@ -114,11 +112,5 @@ public class AsyncProfilerEndpointTest {
     public void testGetVersion() {
         when(asyncProfilerService.getProfilerVersion()).thenReturn("1");
         assertEquals("1", asyncProfilerEndPoint.getVersion());
-    }
-
-    @Test
-    public void testIsSensitive() {
-        assertFalse(new AsyncProfilerEndpoint(asyncProfilerService, false).isSensitive());
-        assertTrue(new AsyncProfilerEndpoint(asyncProfilerService, true).isSensitive());
     }
 }

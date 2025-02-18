@@ -3,7 +3,7 @@ package com.taboola.async_profiler.spring;
 import com.taboola.async_profiler.api.LabelsWrapper;
 import com.taboola.async_profiler.api.continuous.pyroscope.PyroscopeReporterConfig;
 import io.pyroscope.okhttp3.OkHttpClient;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -30,7 +30,7 @@ import java.time.Duration;
 public class AsyncProfilerEndpointConfig {
 
     @Bean
-    @ConfigurationProperties("com.taboola.asyncProfiler")
+    @ConfigurationProperties("com.taboola.async-profiler")
     public AsyncProfilerServiceConfigurations asyncProfilerServiceConfigurations() {
         return new AsyncProfilerServiceConfigurations();
     }
@@ -106,8 +106,7 @@ public class AsyncProfilerEndpointConfig {
     }
 
     @Bean
-    public AsyncProfilerEndpoint asyncProfilerEndpoint(AsyncProfilerService asyncProfilerService,
-                                                       @Value("${com.taboola.asyncProfilerEndpoint.sensitive:false}") boolean isSensitive) {
-        return new AsyncProfilerEndpoint(asyncProfilerService, isSensitive);
+    public AsyncProfilerEndpoint asyncProfilerEndpoint(AsyncProfilerService asyncProfilerService) {
+        return new AsyncProfilerEndpoint(asyncProfilerService);
     }
 }

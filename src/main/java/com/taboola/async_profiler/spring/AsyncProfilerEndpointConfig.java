@@ -2,7 +2,7 @@ package com.taboola.async_profiler.spring;
 
 import com.taboola.async_profiler.api.LabelsWrapper;
 import com.taboola.async_profiler.api.continuous.pyroscope.PyroscopeReporterConfig;
-import io.pyroscope.okhttp3.OkHttpClient;
+import io.pyroscope.vendor.okhttp3.OkHttpClient;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

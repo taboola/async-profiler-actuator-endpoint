@@ -12,7 +12,7 @@ import com.taboola.async_profiler.api.facade.profiler.AsyncProfiler;
 import com.taboola.async_profiler.api.original.Format;
 import com.taboola.async_profiler.utils.IOUtils;
 import com.taboola.async_profiler.utils.ThreadUtils;
-import io.pyroscope.labels.Pyroscope;
+import io.pyroscope.labels.v2.Pyroscope;
 
 /**
  * A friendlier API over the original AsyncProfiler.

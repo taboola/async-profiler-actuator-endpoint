@@ -19,15 +19,15 @@ import com.taboola.async_profiler.api.original.Events;
 import com.taboola.async_profiler.api.original.Format;
 import com.taboola.async_profiler.utils.IOUtils;
 import io.pyroscope.javaagent.util.zip.GzipSink;
-import io.pyroscope.okhttp3.HttpUrl;
-import io.pyroscope.okhttp3.MediaType;
-import io.pyroscope.okhttp3.MultipartBody;
-import io.pyroscope.okhttp3.OkHttpClient;
-import io.pyroscope.okhttp3.Request;
-import io.pyroscope.okhttp3.RequestBody;
-import io.pyroscope.okhttp3.Response;
-import io.pyroscope.okhttp3.ResponseBody;
-import io.pyroscope.okio.BufferedSink;
+import io.pyroscope.vendor.okhttp3.HttpUrl;
+import io.pyroscope.vendor.okhttp3.MediaType;
+import io.pyroscope.vendor.okhttp3.MultipartBody;
+import io.pyroscope.vendor.okhttp3.OkHttpClient;
+import io.pyroscope.vendor.okhttp3.Request;
+import io.pyroscope.vendor.okhttp3.RequestBody;
+import io.pyroscope.vendor.okhttp3.Response;
+import io.pyroscope.vendor.okhttp3.ResponseBody;
+import io.pyroscope.vendor.okio.BufferedSink;
 
 public class PyroscopeReporter implements ProfileResultsReporter {
 

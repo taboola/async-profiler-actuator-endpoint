@@ -1,6 +1,6 @@
 package com.taboola.async_profiler.api.facade.profiler;
 
-import io.pyroscope.one.profiler.Counter;
+import io.pyroscope.vendor.one.profiler.Counter;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 public class AsyncProfilerTest {
 
     @Mock
-    private io.pyroscope.one.profiler.AsyncProfiler delegate;
+    private io.pyroscope.vendor.one.profiler.AsyncProfiler delegate;
 
     @InjectMocks
     private AsyncProfiler asyncProfiler;

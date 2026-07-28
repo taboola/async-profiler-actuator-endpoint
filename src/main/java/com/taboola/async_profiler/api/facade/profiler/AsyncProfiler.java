@@ -1,7 +1,7 @@
 package com.taboola.async_profiler.api.facade.profiler;
 
-import io.pyroscope.one.profiler.AsyncProfilerMXBean;
-import io.pyroscope.one.profiler.Counter;
+import io.pyroscope.vendor.one.profiler.AsyncProfilerMXBean;
+import io.pyroscope.vendor.one.profiler.Counter;
 import lombok.NoArgsConstructor;
 
 import java.io.IOException;
@@ -9,9 +9,9 @@ import java.io.IOException;
 @NoArgsConstructor
 public class AsyncProfiler implements AsyncProfilerMXBean {
 
-    private io.pyroscope.one.profiler.AsyncProfiler delegate;
+    private io.pyroscope.vendor.one.profiler.AsyncProfiler delegate;
 
-    public AsyncProfiler(io.pyroscope.one.profiler.AsyncProfiler delegate) {
+    public AsyncProfiler(io.pyroscope.vendor.one.profiler.AsyncProfiler delegate) {
         this.delegate = delegate;
     }
 
@@ -58,6 +58,11 @@ public class AsyncProfiler implements AsyncProfilerMXBean {
     @Override
     public String dumpFlat(int maxMethods) {
         return delegate.dumpFlat(maxMethods);
+    }
+
+    @Override
+    public byte[] dumpOtlp() {
+        return delegate.dumpOtlp();
     }
 
     public void addThread(Thread thread) {

@@ -1,6 +1,6 @@
 package com.taboola.async_profiler.api.facade.profiler;
 
-import io.pyroscope.one.profiler.Counter;
+import io.pyroscope.vendor.one.profiler.Counter;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -60,6 +60,11 @@ public class LazyLoadedAsyncProfiler extends AsyncProfiler {
 	@Override
 	public String dumpFlat(int maxMethods) {
 		return getOrLoadAsyncProfiler().dumpFlat(maxMethods);
+	}
+
+	@Override
+	public byte[] dumpOtlp() {
+		return getOrLoadAsyncProfiler().dumpOtlp();
 	}
 
 	@Override

@@ -14,7 +14,7 @@ public class ProfileResult implements AutoCloseable {
     InputStream resultInputStream;
     LocalDateTime startTime;
     LocalDateTime endTime;
-    JfrLabels.Snapshot labels;
+    JfrLabels.LabelsSnapshot labels;
 
     @Override
     public void close() throws Exception {

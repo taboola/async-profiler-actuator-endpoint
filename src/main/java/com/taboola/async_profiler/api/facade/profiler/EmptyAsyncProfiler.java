@@ -1,6 +1,6 @@
 package com.taboola.async_profiler.api.facade.profiler;
 
-import io.pyroscope.one.profiler.Counter;
+import io.pyroscope.vendor.one.profiler.Counter;
 
 import java.io.IOException;
 
@@ -58,6 +58,11 @@ public class EmptyAsyncProfiler extends AsyncProfiler {
 
     @Override
     public String dumpFlat(int i) {
+        throw new IllegalStateException(ERROR_MESSAGE + cause.getMessage(), cause);
+    }
+
+    @Override
+    public byte[] dumpOtlp() {
         throw new IllegalStateException(ERROR_MESSAGE + cause.getMessage(), cause);
     }
 

@@ -1,7 +1,7 @@
 package com.taboola.async_profiler.api;
 
-import io.pyroscope.labels.LabelsSet;
-import io.pyroscope.labels.Pyroscope;
+import io.pyroscope.labels.v2.LabelsSet;
+import io.pyroscope.labels.v2.Pyroscope;
 
 import java.util.concurrent.Callable;
 

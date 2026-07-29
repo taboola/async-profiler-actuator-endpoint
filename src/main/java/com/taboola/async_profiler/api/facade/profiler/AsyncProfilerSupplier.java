@@ -1,6 +1,6 @@
 package com.taboola.async_profiler.api.facade.profiler;
 
-import io.pyroscope.labels.io.pyroscope.PyroscopeAsyncProfiler;
+import io.pyroscope.PyroscopeAsyncProfiler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

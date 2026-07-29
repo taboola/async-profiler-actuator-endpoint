@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.function.Supplier;
 
-import io.pyroscope.one.profiler.Counter;
+import io.pyroscope.vendor.one.profiler.Counter;
 import org.junit.Before;
 import org.junit.Test;
 

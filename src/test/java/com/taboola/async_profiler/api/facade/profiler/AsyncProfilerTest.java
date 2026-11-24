@@ -5,12 +5,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockMakers;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,7 +19,8 @@ import static org.mockito.Mockito.when;
 
 public class AsyncProfilerTest {
 
-    @Mock
+    // getSamples() is native, which the default inline mock maker cannot intercept
+    @Mock(mockMaker = MockMakers.SUBCLASS)
     private io.pyroscope.vendor.one.profiler.AsyncProfiler delegate;
 
     @InjectMocks

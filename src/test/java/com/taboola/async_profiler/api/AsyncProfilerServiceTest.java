@@ -5,14 +5,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
@@ -97,7 +97,7 @@ public class AsyncProfilerServiceTest {
         RecurringRunnable continuousProfilingTask = recurringRunnableArgumentCaptor.getValue();
         Runnable innerTask = continuousProfilingTask.getBaseRunnable();
 
-        verifyZeroInteractions(asyncProfilerFacade);
+        verifyNoInteractions(asyncProfilerFacade);
 
         innerTask.run();
 
@@ -131,7 +131,7 @@ public class AsyncProfilerServiceTest {
         RecurringRunnable continuousProfilingTask = recurringRunnableArgumentCaptor.getValue();
         Runnable innerTask = continuousProfilingTask.getBaseRunnable();
 
-        verifyZeroInteractions(asyncProfilerFacade);
+        verifyNoInteractions(asyncProfilerFacade);
 
         innerTask.run();
 

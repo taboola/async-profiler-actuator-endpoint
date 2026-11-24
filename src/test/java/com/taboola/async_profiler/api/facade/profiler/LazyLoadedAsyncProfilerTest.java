@@ -1,12 +1,12 @@
 package com.taboola.async_profiler.api.facade.profiler;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class LazyLoadedAsyncProfilerTest {
 	@Test
 	public void testProfilerIsLazyLoadedOnce() throws IOException {
 		LazyLoadedAsyncProfiler lazyLoadedAsyncProfiler = new LazyLoadedAsyncProfiler(asyncProfilerLoader);
-		verifyZeroInteractions(asyncProfilerLoader);
+		verifyNoInteractions(asyncProfilerLoader);
 
 		lazyLoadedAsyncProfiler.execute("some command");
 		lazyLoadedAsyncProfiler.execute("some command2");

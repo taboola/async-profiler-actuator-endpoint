@@ -3,7 +3,7 @@ package com.taboola.async_profiler.utils;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,7 +37,7 @@ public class RecurringRunnableTest {
         } catch (RuntimeException e) {
         }
 
-        verifyZeroInteractions(runnable);
+        verifyNoInteractions(runnable);
     }
 
     static class DummyRunnable implements Runnable {

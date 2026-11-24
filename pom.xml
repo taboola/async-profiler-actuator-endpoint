@@ -6,7 +6,7 @@
 
     <groupId>com.taboola</groupId>
     <artifactId>async-profiler-actuator-endpoint</artifactId>
-    <version>4.0.1</version>
+    <version>4.1.0</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Async Profiler Actuator Endpoint</description>
@@ -50,9 +50,9 @@
         <slf4j.version>1.7.13</slf4j.version>
         <com.taboola.spring.boot.version>2.7.18</com.taboola.spring.boot.version>
         <com.taboola.spring.version>5.3.31</com.taboola.spring.version>
-        <com.taboola.lombok.version>1.18.10</com.taboola.lombok.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <com.taboola.lombok.version>1.18.44</com.taboola.lombok.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -99,7 +99,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>1.10.19</version>
+            <version>5.6.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -131,7 +131,6 @@
                     <charset>UTF-8</charset>
                     <encoding>UTF-8</encoding>
                     <docencoding>UTF-8</docencoding>
-                    <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
                 </configuration>
                 <executions>
                     <execution>
